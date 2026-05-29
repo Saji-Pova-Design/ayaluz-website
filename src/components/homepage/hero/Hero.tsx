@@ -23,18 +23,17 @@ export function Hero({ content }: HeroProps) {
       className="relative w-full overflow-hidden"
       aria-label="Hero"
     >
-      <div className="relative min-h-screen w-full">
+      <div className="relative min-h-[min(92vh,820px)] w-full sm:min-h-[min(88vh,900px)]">
+        
         <HeroBackground
           src="/images/homepage/hero-jungle-mountain.png"
-          alt="Hero"
+          alt="Sacred jungle mountains"
         />
 
-        {/* OVERLAY */}
-        <div className="absolute inset-0 bg-black/30 z-10" />
-
-        {/* CONTENT */}
-        <div className="relative z-20 mx-auto flex min-h-screen max-w-[1440px] items-center px-6 py-24 lg:px-10">
-          <div className="flex max-w-3xl flex-col gap-6 text-white">
+        <div className="relative z-20 mx-auto flex min-h-[inherit] max-w-[1440px] items-end px-4 pb-12 pt-28 sm:items-center sm:px-6 sm:pb-20 sm:pt-32 lg:px-10 lg:pb-24">
+          
+          <div className="flex max-w-2xl flex-col gap-5 sm:gap-6 lg:max-w-3xl lg:gap-7">
+            
             <HeroEyebrow text={eyebrow} />
 
             <HeroHeadline lines={headlineLines} />
@@ -45,6 +44,7 @@ export function Hero({ content }: HeroProps) {
               primary={primaryCta}
               secondary={secondaryCta}
             />
+
           </div>
         </div>
       </div>
