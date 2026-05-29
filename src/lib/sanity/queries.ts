@@ -114,7 +114,9 @@ export async function getHomepageHeaderFromSanity(): Promise<HomepageHeaderConte
         data.hero.paragraphLines?.[1] ?? "",
       ],
       backgroundImage: {
-        src: data.hero.backgroundSrc ?? "/images/homepage/hero-jungle-mountain.png",
+        src:
+  data.hero.backgroundSrc ||
+  "/images/homepage/hero-jungle-mountain.png",
         alt: data.hero.backgroundImage?.alt ?? "Sacred jungle mountains",
       },
       primaryCta: {
