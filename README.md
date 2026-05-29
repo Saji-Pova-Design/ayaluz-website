@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AYALUZ
 
-## Getting Started
+Luxury spiritual retreat marketing site — Next.js (App Router), Tailwind CSS v4, Sanity CMS, deployed on Vercel.
 
-First, run the development server:
+## Homepage header (3 CMS components)
+
+| Component | Path | Sanity type |
+|-----------|------|-------------|
+| Promotional banner | `src/components/banner/PromoBanner.tsx` | `promoBanner` |
+| Navigation | `src/components/layout/Navbar.tsx` | `navbar` |
+| Hero | `src/components/hero/Hero.tsx` | `hero` |
+
+All three are composed in `HomepageHeader` and loaded from a single Sanity document: **Homepage Header** (`homepageHeader`).
+
+### Micro-elements (editable in CMS)
+
+**Banner:** `enabled`, `icon`, `label`, `message`, `link` (label, href)
+
+**Navbar:** `brandName`, `logo`, `items[]` (label, href per page)
+
+**Hero:** `eyebrow`, `headlineLines` (exactly 3 strings), `paragraph`, `backgroundImage`, `primaryCta`, `secondaryCta`
+
+## Local development
 
 ```bash
+cp .env.example .env.local
+# Add NEXT_PUBLIC_SANITY_PROJECT_ID and NEXT_PUBLIC_SANITY_DATASET
+
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). Without Sanity env vars, placeholder content from `src/lib/cms/placeholders.ts` is used.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Sanity Studio
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Embedded at `/studio` when env vars are set, or run standalone:
 
-## Learn More
+```bash
+npm run sanity
+```
 
-To learn more about Next.js, take a look at the following resources:
+Create one **Homepage Header** document in Studio and publish it.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Typography
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Add licensed **Canela** files to `public/fonts/` and switch `src/app/layout.tsx` to `next/font/local` for brand-accurate type.
 
-## Deploy on Vercel
+## Design system
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Colors, spacing, and UI rules follow the AYALUZ design system (Primary Green `#2B4A40`, background `#F6F1E8`, buttons `8px` radius, etc.) in `src/app/globals.css`.

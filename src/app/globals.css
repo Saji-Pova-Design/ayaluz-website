@@ -1,26 +1,49 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --primary-green: #2b4a40;
+  --primary-green-hover: #1f3a32;
+  --earthy-accent: #8a5a44;
+  --primary-bg: #f6f1e8;
+  --secondary-bg: #efe7dc;
+  --border: #d8cec2;
+  --dark-text: #222222;
+  --light-text: #f6f1e8;
+  --gold-accent: #f2cb75;
+  --font-sans-minimal: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary-green: var(--primary-green);
+  --color-primary-green-hover: var(--primary-green-hover);
+  --color-earthy: var(--earthy-accent);
+  --color-primary-bg: var(--primary-bg);
+  --color-secondary-bg: var(--secondary-bg);
+  --color-border: var(--border);
+  --color-dark: var(--dark-text);
+  --color-light: var(--light-text);
+  --color-gold: var(--gold-accent);
+  --color-gold-accent: var(--gold-accent);
+  --font-sans-minimal: var(--font-sans-minimal);
+  --font-canela: var(--font-canela-family), Georgia, "Times New Roman", serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--primary-bg);
+  color: var(--dark-text);
+  font-family: var(--font-sans-minimal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-sans-minimal {
+  font-family: var(--font-sans-minimal);
+}
+
+.font-canela {
+  font-family: var(--font-canela);
 }
