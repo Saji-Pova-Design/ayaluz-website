@@ -3,23 +3,28 @@ type HeroBackgroundProps = {
   alt: string;
 };
 
-export function HeroBackground({
-  src,
-  alt,
-}: HeroBackgroundProps) {
+export function HeroBackground({ src, alt }: HeroBackgroundProps) {
   return (
-    <div className="absolute inset-0 -z-10">
-      
-      {/* IMAGE */}
-      <img
-        src={src}
-        alt={alt}
-        className="absolute inset-0 h-full w-full object-cover"
+    <>
+      <div
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundImage: `url(${src})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+        aria-label={alt}
       />
 
-      {/* DARK OVERLAY */}
-      <div className="absolute inset-0 bg-black/40" />
+      <div
+        className="absolute inset-0 z-10 bg-gradient-to-r from-[#1a2e28]/85 via-[#1a2e28]/55 to-[#1a2e28]/25"
+        aria-hidden
+      />
 
-    </div>
+      <div
+        className="absolute inset-0 z-10 bg-gradient-to-t from-[#1a2e28]/50 via-transparent to-transparent sm:hidden"
+        aria-hidden
+      />
+    </>
   );
 }
