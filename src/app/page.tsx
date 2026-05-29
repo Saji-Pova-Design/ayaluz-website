@@ -1,23 +1,16 @@
-export default function Home() {
+import { HomepageHeader } from "@/components/homepage/hero/homepageheader/HomepageHeader";
+import { getHomepageHeader } from "@/lib/cms/getHomepageHeader";
+
+import UpcomingEventSection from "@/components/homepage/upcoming-event/UpcomingEventSection";
+
+export default async function Home() {
+  const header = await getHomepageHeader();
+
   return (
-    <main className="min-h-screen">
-      
-      <div className="relative h-screen w-full">
-        
-        <img
-          src="/images/homepage/hero-jungle-mountain.png"
-          alt="Hero"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
+    <main className="min-h-screen bg-primary-bg">
+      <HomepageHeader content={header} />
 
-        <div className="absolute inset-0 z-[99999] flex items-center justify-center">
-          <div className="bg-red-500 p-10 text-6xl font-bold text-white">
-            PAGE TEST
-          </div>
-        </div>
-
-      </div>
-
+      <UpcomingEventSection />
     </main>
   );
 }
