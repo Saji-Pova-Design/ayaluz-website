@@ -1,9 +1,13 @@
 import { HeroBackground } from "@/components/homepage/hero/HeroBackground";
+import type { HeroContent } from "@/types/cms";
 
-export function Hero() {
+type HeroProps = {
+  content: HeroContent;
+};
+
+export function Hero({ content }: HeroProps) {
   return (
     <section className="relative h-screen w-full overflow-hidden">
-      
       <HeroBackground
         src="/images/homepage/hero-jungle-mountain.png"
         alt="Hero"
@@ -14,7 +18,6 @@ export function Hero() {
           HERO TEST
         </div>
       </div>
-
     </section>
   );
 }
