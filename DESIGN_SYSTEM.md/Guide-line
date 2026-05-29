@@ -1,0 +1,206 @@
+# AYALUZ DESIGN SYSTEM
+
+## Brand Essence
+AyaLuz is a luxury spiritual retreat platform focused on ayahuasca healing journeys, sacred ceremonies, emotional transformation, and conscious wellness experiences in Peru.
+
+The visual identity should feel:
+- sacred
+- cinematic
+- grounded
+- elegant
+- healing
+- premium
+- organic
+- timeless
+
+Avoid:
+- startup/SaaS aesthetics
+- corporate UI
+- neon gradients
+- overly modern tech feeling
+- excessive glassmorphism
+- cluttered layouts
+
+---
+
+# Color Palette
+
+## Primary Colors
+Deep Jungle Green:
+#2B4A40
+
+## Hover
+Dark Green:
+#1F3A32
+
+Earth-Accent :
+#8A5A44
+
+Gold Accent:
+#F2CB75
+
+## Primary Background
+#F6F1E8
+
+## Secondary Background
+#EFE7DC
+
+## Border
+#D8CEC2
+
+Black Text:
+#222222
+
+Light Text:
+#F6F1E8
+
+Green Text:
+#2B4A40
+
+Muted Sage:
+#8A9A8D
+
+---
+
+# Typography
+
+## Headlines
+Elegant serif typography.Canela font, available in Public/fonts
+
+Style:
+- cinematic
+- editorial
+- spacious
+- emotional
+- premium
+
+## Body Text
+helvetica neue font.
+
+Readable and calm.
+for buttons also use helvetica neue font
+
+---
+
+# Layout Principles
+
+- Large vertical breathing room
+- Editorial asymmetrical layouts
+- Soft rounded corners
+- Cinematic compositions
+- Layered imagery
+- Calm spacing rhythm
+- Minimal clutter
+- Premium retreat atmosphere
+
+---
+
+# Spacing System
+
+## Section Padding
+Desktop:
+py-24 to py-40
+
+Mobile:
+py-16 to py-24
+
+## Container Width
+max-w-[1440px]
+
+---
+
+# Component Philosophy
+
+Components must be:
+- reusable
+- modular
+- CMS-friendly
+- responsive
+- minimal
+- elegant
+
+---
+
+# Shared UI Components
+
+Global reusable components:
+
+- PrimaryButton
+- SecondaryButton
+- SectionHeading
+- HeroEyebrow
+- Container
+- GlassCard
+- CTAButton
+- RetreatCard
+
+---
+
+# Hero Sections
+
+Hero sections should:
+- use cinematic nature imagery
+- contain emotional spiritual copy
+- include dark image overlays
+- use left-aligned editorial layouts
+- avoid centered SaaS structures
+
+---
+
+# Cards
+
+Cards should:
+- use soft transparency
+- have subtle borders
+- rounded corners
+- calm shadows
+- warm backgrounds
+
+---
+
+# Cards drop shadow
+attributes:
+- X=0
+- Y=12
+- Blur=40
+- Spread=0
+- color= #141916
+- opacity= 20%
+---
+
+# Animations
+
+Animations should be:
+- subtle
+- slow
+- calm
+- premium
+- non-distracting
+
+Avoid:
+- excessive motion
+- bouncing effects
+- flashy transitions
+
+---
+
+# Technical Stack
+
+- Next.js App Router
+- TailwindCSS
+- TypeScript
+- Sanity CMS
+- Vercel deployment
+
+---
+
+# Rules For AI Generation
+
+Whenever generating new UI:
+- maintain AyaLuz visual language
+- preserve typography consistency
+- preserve spacing consistency
+- preserve color harmony
+- avoid introducing new visual systems
+
+All future sections must feel part of the same sacred luxury retreat ecosystem.
