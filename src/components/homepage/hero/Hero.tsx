@@ -24,7 +24,7 @@ export function Hero({ content }: HeroProps) {
       <div className="relative min-h-[min(92vh,820px)] w-full sm:min-h-[min(88vh,900px)]">
         <HeroBackground src={backgroundImage.src} alt={backgroundImage.alt} />
 
-        <div className="relative mx-auto flex min-h-[inherit] max-w-[1440px] items-end px-4 pb-12 pt-28 sm:items-center sm:px-6 sm:pb-20 sm:pt-32 lg:px-10 lg:pb-24">
+        <div className="relative z-10 mx-auto flex min-h-[92vh] max-w-[1440px] items-end px-4 pb-12 pt-28 sm:min-h-[88vh] sm:items-center sm:px-6 sm:pb-20 sm:pt-32 lg:px-10 lg:pb-24">
           <div className="flex max-w-2xl flex-col gap-5 sm:gap-6 lg:max-w-3xl lg:gap-7">
             <HeroEyebrow text={eyebrow} />
             <HeroHeadline lines={headlineLines} />
