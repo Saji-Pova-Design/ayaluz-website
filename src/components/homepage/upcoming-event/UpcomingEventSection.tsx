@@ -3,6 +3,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { ViewDetailsButton } from "@/components/homepage/upcoming-event/ViewDetailsButton";
+import EventDetailOverlay from "@/components/homepage/upcoming-event/overlay/EventDetailOverlay";
+import { homepageCeremonyEvent } from "@/lib/events/homepage-ceremony";
+import type { CeremonyEventDetail } from "@/types/ceremony-event";
 
 interface EventData {
   title: string;
@@ -71,8 +75,10 @@ function EventBadge({ title }: { title: string }) {
 
 export default function UpcomingEventSection({
   eventData = defaultEventData,
+  ceremony = homepageCeremonyEvent,
 }: {
   eventData?: EventData;
+  ceremony?: CeremonyEventDetail;
 }) {
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({
     days: 0,
@@ -81,6 +87,7 @@ export default function UpcomingEventSection({
   });
 
   const [isClient, setIsClient] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   const calculateTimeLeft = useCallback(() => {
     const now = new Date();
@@ -118,16 +125,16 @@ export default function UpcomingEventSection({
   };
 
   const countdownItems = [
-    { label: "Days", value: timeLeft.days },
-    { label: "Hours", value: timeLeft.hours },
-    { label: "Minutes", value: timeLeft.minutes },
+    { label: "days", value: timeLeft.days },
+    { label: "hrs", value: timeLeft.hours },
+    { label: "mins", value: timeLeft.minutes },
   ];
 
   return (
     <section className="w-full bg-[#F6F1E8] py-6 md:py-8 lg:py-10">
       <div className="mx-auto max-w-[1800px] px-4 md:px-6 lg:px-10">
         {/* MAIN WRAPPER */}
-        <div className="relative mx-auto w-full max-w-[380px] md:max-w-[560px] lg:mx-0 lg:h-[520px] lg:max-w-none lg:overflow-visible">
+        <div className="relative mx-auto w-full max-w-[380px] md:max-w-[800px] lg:mx-0 lg:h-[520px] lg:max-w-none lg:overflow-visible">
           {/* BADGE — mobile/tablet on image; desktop floats above card */}
           <div className="absolute top-4 left-4 z-30 md:top-5 md:left-5 lg:top-[-20px] lg:left-16">
             <EventBadge title={eventData.title} />
@@ -191,38 +198,46 @@ export default function UpcomingEventSection({
                     {eventData.description}
                   </p>
 
-                  <div className="mt-4 flex flex-col items-stretch gap-4 md:mt-5 md:gap-5 lg:mt-4 lg:items-start lg:gap-5">
-                    <motion.a
-                      href={eventData.ctaLink}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-className="inline-flex h-[46px] w-fit items-center justify-center self-start rounded-[14px] bg-[#2B4A40] px-4 text-[16px] font-medium text-[#F6F1E8] shadow-lg md:h-[48px] md:rounded-[16px] md:px-4 md:text-[17px] lg:h-[48px] lg:w-auto lg:rounded-[18px] lg:px-10 lg:text-[18px]"
-                    >
-                      {eventData.ctaText}
-                    </motion.a>
+                  <ViewDetailsButton onClick={() => setDetailsOpen(true)} />
 
-                    {isClient && (
-                      <div className="flex w-fit items-center justify-between gap-5 self-start md:gap-6 lg:w-[230px] lg:max-w-none lg:gap-0">
-                        {countdownItems.map((item, i) => (
-                          <div key={item.label} className="flex items-center gap-2 md:gap-3 lg:gap-4">
-                            <div className="text-center">
-                              <div className="text-[26px] font-light leading-none text-[#1E1E1E] md:text-[28px] lg:text-[30px]">
-                                {String(item.value).padStart(2, "0")}
-                              </div>
-                              <div className="mt-1.5 text-[11px] text-[#222222] md:mt-2 md:text-[12px]">
-                                {item.label}
-                              </div>
-                            </div>
-                            {i < 2 && (
-                              <span className="text-[26px] font-light opacity-40 md:text-[28px] lg:text-[30px]">
-                                :
-                              </span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  <div className="mt-4 flex items-center justify-between gap-3 md:mt-5 lg:mt-4">
+  <motion.a
+    href={eventData.ctaLink}
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+    className="inline-flex h-[44px] shrink-0 items-center justify-center rounded-[14px] bg-[#2B4A40] px-4 text-[14px] font-medium text-[#F6F1E8] shadow-lg md:h-[48px] md:rounded-[16px] md:px-4 md:text-[17px] lg:h-[48px] lg:rounded-[18px] lg:px-10 lg:text-[18px]"
+  >
+    {eventData.ctaText}
+  </motion.a>
+
+  {isClient && (
+    <div className="flex items-center gap-1 md:gap-2 lg:gap-3">
+      {countdownItems.map((item, i) => (
+        <div
+          key={item.label}
+          className="flex items-center gap-0.5 md:gap-1.5"
+        >
+          <div className="text-center">
+            <div className="text-[20px] font-light leading-none text-[#1E1E1E] md:text-[26px] lg:text-[30px]">
+              {String(item.value).padStart(2, "0")}
+            </div>
+
+            <div className="mt-0.5 text-[9px] text-[#222222] md:mt-1 md:text-[11px]">
+              {item.label}
+            </div>
+          </div>
+
+          {i < 2 && (
+            <span className="text-[18px] font-light opacity-40 md:text-[24px] lg:text-[30px]">
+              :
+            </span>
+          )}
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+              
                 </div>
 
                 {/* WHATSAPP */}
@@ -254,6 +269,12 @@ className="inline-flex h-[46px] w-fit items-center justify-center self-start rou
           </div>
         </div>
       </div>
+
+      <EventDetailOverlay
+        open={detailsOpen}
+        onClose={() => setDetailsOpen(false)}
+        event={ceremony}
+      />
     </section>
   );
 }
