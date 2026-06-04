@@ -1,22 +1,39 @@
-import type { Metadata } from "next";
-import { HomepageHeader } from "@/components/homepage/hero/homepageheader/HomepageHeader";
-import { getHomepageHeader } from "@/lib/cms/getHomepageHeader";
-import UpcomingEventSection from "@/components/homepage/upcoming-event/UpcomingEventSection";
-import { buildEventShareMetadata } from "@/lib/share/build-share-metadata";
-import { homepageEventShareConfig } from "@/lib/share/event-share-config";
+import PageBuilder from "@/components/page-builder/PageBuilder";
 
-/** Rich link previews for homepage share (WhatsApp, iMessage, Facebook, etc.) */
-export const metadata: Metadata = {
-  ...buildEventShareMetadata(homepageEventShareConfig),
-};
+import { client } from "@/sanity/lib/client";
+import { pageBySlugQuery } from "@/sanity/lib/queries";
 
-export default async function Home() {
-  const header = await getHomepageHeader();
+export default async function HomePage() {
+  try {
+    const page = await client.fetch(
+      pageBySlugQuery,
+      {
+        slug: "home",
+      },
+      {
+        cache: "no-store",
+      }
+    );
 
-  return (
-    <main className="min-h-screen bg-primary-bg">
-      <HomepageHeader content={header} />
-      <UpcomingEventSection />
-    </main>
-  );
+    return (
+      <main>
+        <PageBuilder
+          sections={page?.pageBuilder || []}
+        />
+      </main>
+    );
+  } catch (error) {
+    console.error("SANITY ERROR:", error);
+
+    return (
+      <main
+        style={{
+          padding: "40px",
+          fontSize: "24px",
+        }}
+      >
+        SANITY FETCH FAILED
+      </main>
+    );
+  }
 }

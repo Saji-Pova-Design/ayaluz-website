@@ -1,0 +1,204 @@
+type CalendarRetreatDateBadgeProps = {
+  startDay: string;
+  startMonth: string;
+  startYear: string;
+
+  endDay: string;
+  endMonth: string;
+  endYear: string;
+};
+
+export default function CalendarRetreatDateBadge({
+  startDay,
+  startMonth,
+  startYear,
+  endDay,
+  endMonth,
+  endYear,
+}: CalendarRetreatDateBadgeProps) {
+  return (
+    <div
+      className="
+        flex
+        items-start
+        gap-5
+        md:gap-8
+        lg:gap-10
+      "
+    >
+      <div
+        className="
+          flex
+          flex-col
+          items-center
+        "
+      >
+        <div
+          className="
+            flex
+            h-16
+            w-16
+            items-center
+            justify-center
+            rounded-2xl
+            border
+            border-[#28543B]
+            bg-transparent
+            md:h-20
+            md:w-20
+            lg:h-24
+            lg:w-24
+            lg:rounded-[26px]
+          "
+        >
+          <span
+            className="
+              text-3xl
+              font-bold
+              leading-none
+              tracking-[-0.04em]
+              text-[#111111]
+              md:text-5xl
+              lg:text-6xl
+            "
+          >
+            {startDay}
+          </span>
+        </div>
+
+        <div
+          className="
+            mt-4
+            text-center
+          "
+        >
+          <div
+            className="
+              text-2xl
+              font-bold
+              leading-none
+              tracking-[-0.04em]
+              text-[#111111]
+              md:text-4xl
+              lg:text-5xl
+            "
+          >
+            {startMonth}
+          </div>
+
+          <div
+            className="
+              mt-2
+              text-lg
+              font-normal
+              leading-none
+              tracking-[-0.03em]
+              text-[#111111]
+              md:text-2xl
+              lg:text-3xl
+            "
+          >
+            {startYear}
+          </div>
+        </div>
+      </div>
+
+      <div
+        className="
+          flex
+          h-16
+          items-center
+          md:h-20
+          lg:h-24
+        "
+      >
+        <div
+          className="
+            h-px
+            w-10
+            bg-[#28543B]
+            md:w-14
+            lg:w-16
+          "
+        />
+      </div>
+
+      <div
+        className="
+          flex
+          flex-col
+          items-center
+        "
+      >
+        <div
+          className="
+            flex
+            h-16
+            w-16
+            items-center
+            justify-center
+            rounded-2xl
+            border
+            border-[#28543B]
+            bg-transparent
+            md:h-20
+            md:w-20
+            lg:h-24
+            lg:w-24
+            lg:rounded-[26px]
+          "
+        >
+          <span
+            className="
+              text-3xl
+              font-bold
+              leading-none
+              tracking-[-0.04em]
+              text-[#111111]
+              md:text-5xl
+              lg:text-6xl
+            "
+          >
+            {endDay}
+          </span>
+        </div>
+
+        <div
+          className="
+            mt-4
+            text-center
+          "
+        >
+          <div
+            className="
+              text-2xl
+              font-bold
+              leading-none
+              tracking-[-0.04em]
+              text-[#111111]
+              md:text-4xl
+              lg:text-5xl
+            "
+          >
+            {endMonth}
+          </div>
+
+          <div
+            className="
+              mt-2
+              text-lg
+              font-normal
+              leading-none
+              tracking-[-0.03em]
+              text-[#111111]
+              md:text-2xl
+              lg:text-3xl
+            "
+          >
+            {endYear}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -14,46 +14,33 @@ type EventFeatureGridProps = {
 export default function EventFeatureGrid({
   features,
 }: EventFeatureGridProps) {
-  const leftIds = [
-    "ceremony",
-    "guides",
-    "translation",
-  ];
-
-  const rightIds = [
-    "fruit",
-    "temple",
-    "location",
-  ];
-
-  const leftColumn = features.filter((feature) =>
-    leftIds.includes(feature.id),
+  const midpoint = Math.ceil(
+    features.length / 2,
   );
 
-  const rightColumn = features.filter((feature) =>
-    rightIds.includes(feature.id),
-  );
+  const leftColumn =
+    features.slice(0, midpoint);
 
-  const orderedMobile = [
-    ...leftColumn,
-    ...rightColumn,
-  ];
+  const rightColumn =
+    features.slice(midpoint);
 
-  const renderFeature = (feature: Feature) => (
+  const renderFeature = (
+    feature: Feature,
+  ) => (
     <div
       key={feature.id}
       className="flex items-start gap-4"
     >
       <div className="flex h-[56px] w-[56px] shrink-0 items-center justify-center rounded-[24px] bg-[#C7D3C4]">
-      <div className="flex h-[36px] w-[36px] items-center justify-center">
-  <Image
-    src={feature.icon}
-    alt={feature.label}
-    width={36}
-    height={36}
-    className="h-[36px] w-[36px] object-contain"
-  />
-</div>
+        <div className="flex h-[36px] w-[36px] items-center justify-center">
+          <Image
+            src={feature.icon}
+            alt={feature.label}
+            width={36}
+            height={36}
+            className="h-[36px] w-[36px] object-contain"
+          />
+        </div>
       </div>
 
       <div className="flex flex-col">
@@ -61,11 +48,14 @@ export default function EventFeatureGrid({
           {feature.label}
         </p>
 
-        {feature.id === "location" && (
+        {feature.id ===
+          "location" && (
           <button className="mt-2 flex items-center gap-2 text-[14px] text-[#0066FF]">
             <MapPin size={18} />
 
-            <span>See on map</span>
+            <span>
+              See on map
+            </span>
           </button>
         )}
       </div>
@@ -76,17 +66,23 @@ export default function EventFeatureGrid({
     <>
       {/* MOBILE */}
       <div className="flex flex-col gap-6 md:hidden">
-        {orderedMobile.map(renderFeature)}
+        {features.map(
+          renderFeature,
+        )}
       </div>
 
       {/* DESKTOP */}
       <div className="hidden md:grid md:grid-cols-2 md:gap-x-8">
         <div className="flex flex-col gap-6">
-          {leftColumn.map(renderFeature)}
+          {leftColumn.map(
+            renderFeature,
+          )}
         </div>
 
         <div className="flex flex-col gap-6">
-          {rightColumn.map(renderFeature)}
+          {rightColumn.map(
+            renderFeature,
+          )}
         </div>
       </div>
     </>

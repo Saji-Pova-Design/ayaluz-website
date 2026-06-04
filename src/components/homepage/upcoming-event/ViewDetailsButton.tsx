@@ -7,10 +7,13 @@ export function ViewDetailsButton({ onClick }: ViewDetailsButtonProps) {
     <button
       type="button"
       onClick={onClick}
-      className="mt-2 inline-flex w-fit items-center gap-1 self-start font-sans-minimal text-[14px] tracking-[0.03em] text-[#2B4A40] underline-offset-4 transition-[color,opacity] duration-300 hover:text-[#1F3A32] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2B4A40]/40 lg:mt-2 lg:text-[16px]"
+      className="group inline-flex items-center gap-1.5 text-[14px] font-medium text-[#111111] transition-all duration-300 hover:opacity-70 lg:gap-2 lg:text-[16px]"
     >
-      <span>View Details</span>
-      <span aria-hidden className="opacity-80">
+      <span className="border-b border-transparent transition-all duration-300 group-hover:border-[#111111]">
+        View details
+      </span>
+
+      <span className="transition-transform duration-300 group-hover:translate-x-1">
         →
       </span>
     </button>

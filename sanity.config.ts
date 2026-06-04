@@ -1,15 +1,22 @@
-import { defineConfig } from "sanity";
-import { structureTool } from "sanity/structure";
-import { schemaTypes } from "./sanity/schemas";
+import {defineConfig} from "sanity";
+import {structureTool} from "sanity/structure";
 
-const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!;
-const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET ?? "production";
+import {schemaTypes} from "./src/sanity/schemaTypes";
 
 export default defineConfig({
-  name: "ayaluz",
-  title: "AYALUZ",
-  projectId,
-  dataset,
-  plugins: [structureTool()],
-  schema: { types: schemaTypes },
+name: "default",
+
+title: "AYALUZ",
+
+projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
+
+dataset: process.env.NEXT_PUBLIC_SANITY_DATASET!,
+
+basePath: "/studio",
+
+plugins: [structureTool()],
+
+schema: {
+types: schemaTypes,
+},
 });

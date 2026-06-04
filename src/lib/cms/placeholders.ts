@@ -37,7 +37,7 @@ export const homepageHeaderPlaceholder: HomepageHeaderContent = {
       "Guided with love and rooted in ancient wisdom.",
     ],
     backgroundImage: {
-      src: "/images/hero-jungle-mountain.png",
+      src: "/images/homepage/hero-jungle-mountain.png",
       alt: "Misty jungle mountains in Peru's Sacred Valley at golden hour",
     },
     primaryCta: {
