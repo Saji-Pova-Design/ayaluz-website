@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 export type CountdownValues = {
   days: number;
@@ -20,23 +20,12 @@ export function useCountdown(targetDate: Date): CountdownValues {
       };
     }
 
-    return { days: 0, hours: 0, minutes: 0 };
+    return {
+      days: 0,
+      hours: 0,
+      minutes: 0,
+    };
   }, [targetDate]);
 
-  const [timeLeft, setTimeLeft] = useState<CountdownValues>({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-  });
-
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    setReady(true);
-    setTimeLeft(calculate());
-    const timer = setInterval(() => setTimeLeft(calculate()), 1000);
-    return () => clearInterval(timer);
-  }, [calculate]);
-
-  return ready ? timeLeft : { days: 0, hours: 0, minutes: 0 };
+  return useMemo(() => calculate(), [calculate]);
 }
