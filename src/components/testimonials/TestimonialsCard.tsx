@@ -1,10 +1,12 @@
 'use client'
 
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Star } from 'lucide-react'
+
 import type { Testimonial } from './testimonialsData'
 
-interface TestimonialsCardProps {
+type TestimonialsCardProps = {
   testimonial: Testimonial
   isActive: boolean
 }
@@ -20,32 +22,34 @@ export default function TestimonialsCard({
       transition={{ duration: 0.6 }}
       className={isActive ? 'block' : 'hidden'}
     >
-      <div className="flex flex-col md:flex-row gap-8 items-center">
-        <div className="w-full md:w-80 flex-shrink-0">
-          <img
+      <div className="flex flex-col items-center gap-8 md:flex-row">
+        <div className="relative h-80 w-full shrink-0 overflow-hidden rounded-2xl md:w-80">
+          <Image
             src={testimonial.image}
             alt={testimonial.name}
-            className="w-full h-80 object-cover rounded-2xl"
+            fill
+            sizes="(max-width: 768px) 100vw, 320px"
+            className="object-cover"
           />
         </div>
 
         <div className="flex-1">
-          <div className="flex gap-1 mb-4">
-            {[...Array(5)].map((_, i: number) => (
+          <div className="mb-4 flex gap-1">
+            {Array.from({ length: 5 }).map((_, index) => (
               <Star
-                key={i}
+                key={index}
                 size={22}
                 className="fill-[#D4AF37] text-[#D4AF37]"
               />
             ))}
           </div>
 
-          <h3 className="text-2xl font-serif mb-4 text-[#222222]">
+          <h3 className="mb-4 font-serif text-2xl text-[#222222]">
             {testimonial.title}
           </h3>
 
-          <p className="italic text-[#222222]/80 leading-relaxed mb-6">
-            "{testimonial.text}"
+          <p className="mb-6 italic leading-relaxed text-[#222222]/80">
+            &ldquo;{testimonial.text}&rdquo;
           </p>
 
           <div>

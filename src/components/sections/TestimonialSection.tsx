@@ -133,12 +133,14 @@ export default function TestimonialsSection({ data }: TestimonialsSectionProps) 
   const [isHovered, setIsHovered] = useState(false)
 
   const hasTestimonials = testimonials.length > 0
+  const safeCurrentIndex =
+    hasTestimonials && currentIndex <= testimonials.length - 1 ? currentIndex : 0
 
   const nextSlide = () => {
     if (!hasTestimonials) return
 
     setCurrentIndex((prev) =>
-      prev === testimonials.length - 1 ? 0 : prev + 1,
+      prev >= testimonials.length - 1 ? 0 : prev + 1,
     )
   }
 
@@ -146,7 +148,7 @@ export default function TestimonialsSection({ data }: TestimonialsSectionProps) 
     if (!hasTestimonials) return
 
     setCurrentIndex((prev) =>
-      prev === 0 ? testimonials.length - 1 : prev - 1,
+      prev <= 0 ? testimonials.length - 1 : prev - 1,
     )
   }
 
@@ -155,18 +157,12 @@ export default function TestimonialsSection({ data }: TestimonialsSectionProps) 
 
     const interval = setInterval(() => {
       setCurrentIndex((prev) =>
-        prev === testimonials.length - 1 ? 0 : prev + 1,
+        prev >= testimonials.length - 1 ? 0 : prev + 1,
       )
     }, 6500)
 
     return () => clearInterval(interval)
   }, [hasTestimonials, testimonials.length, isHovered])
-
-  useEffect(() => {
-    if (currentIndex > testimonials.length - 1) {
-      setCurrentIndex(0)
-    }
-  }, [currentIndex, testimonials.length])
 
   return (
     <section className="w-full overflow-hidden bg-[#F6F1E8] py-20 md:py-32">
@@ -215,7 +211,7 @@ export default function TestimonialsSection({ data }: TestimonialsSectionProps) 
               {hasTestimonials ? (
                 <AnimatePresence mode="wait">
                   <motion.div
-                    key={currentIndex}
+                    key={safeCurrentIndex}
                     initial={{ opacity: 0, y: 18 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -18 }}
@@ -224,7 +220,7 @@ export default function TestimonialsSection({ data }: TestimonialsSectionProps) 
                       ease: [0.32, 0.72, 0.36, 1],
                     }}
                   >
-                    <TestimonialsCard testimonial={testimonials[currentIndex]} />
+                    <TestimonialsCard testimonial={testimonials[safeCurrentIndex]} />
                   </motion.div>
                 </AnimatePresence>
               ) : (
@@ -268,7 +264,7 @@ export default function TestimonialsSection({ data }: TestimonialsSectionProps) 
                   onClick={() => setCurrentIndex(index)}
                   aria-label={`Go to testimonial ${index + 1}`}
                   className={`h-2.5 rounded-full transition-all duration-300 ${
-                    currentIndex === index
+                    safeCurrentIndex === index
                       ? 'w-8 bg-[#2B4A40]'
                       : 'w-2.5 bg-[#2B4A40]/30'
                   }`}

@@ -1,12 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { motion } from "framer-motion";
 
 import Image from "next/image";
-
-import type { CeremonyEventDetail } from "@/types/ceremony-event";
 
 import { ViewDetailsButton } from "@/components/homepage/upcoming-event/ViewDetailsButton";
 
@@ -18,12 +16,38 @@ import CalendarRetreatDateBadge from "@/components/homepage/calendar/CalendarRet
 
 import { calendarMonths } from "@/components/homepage/calendar/data";
 
+import type { CeremonyEventDetail } from "@/types/ceremony-event";
+
 interface TimeLeft {
   days: number;
-
   hours: number;
-
   minutes: number;
+}
+
+function getTimeLeft(eventDate: Date | null): TimeLeft {
+  if (!eventDate) {
+    return {
+      days: 0,
+      hours: 0,
+      minutes: 0,
+    };
+  }
+
+  const difference = eventDate.getTime() - Date.now();
+
+  if (difference <= 0) {
+    return {
+      days: 0,
+      hours: 0,
+      minutes: 0,
+    };
+  }
+
+  return {
+    days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+    hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+    minutes: Math.floor((difference / 1000 / 60) % 60),
+  };
 }
 
 function WhatsAppIcon({
@@ -37,13 +61,9 @@ function WhatsAppIcon({
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
+      aria-hidden="true"
     >
-      <circle
-        cx="12"
-        cy="12"
-        r="12"
-        fill="#25D366"
-      />
+      <circle cx="12" cy="12" r="12" fill="#25D366" />
 
       <path
         fill="white"
@@ -74,135 +94,82 @@ function EventBadge({
 }
 
 export default function UpcomingEventSection() {
-  const [detailsOpen, setDetailsOpen] =
-    useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+  });
 
-  const [isClient, setIsClient] =
-    useState(false);
+  const allEvents = useMemo(() => {
+    return calendarMonths.flatMap((month) => month.events);
+  }, []);
 
-  /**
-   * AUTO FIND NEAREST UPCOMING EVENT
-   */
-
-  const now = new Date();
-
-  const allEvents = calendarMonths.flatMap(
-    (month) => month.events,
-  );
-  
-  const upcomingEvents = allEvents
-    .filter((event) => {
-      const startDate =
-        event.type === "retreat"
-          ? new Date(event.startDate)
-          : new Date(event.date);
-  
-      return (
-        startDate.getTime() >
-        now.getTime()
-      );
-    })
-    .sort((a, b) => {
-      const aDate =
-        a.type === "retreat"
-          ? new Date(a.startDate).getTime()
-          : new Date(a.date).getTime();
-  
-      const bDate =
-        b.type === "retreat"
-          ? new Date(b.startDate).getTime()
-          : new Date(b.date).getTime();
-  
-      return aDate - bDate;
-    });
-
-  /**
-   * NEAREST EVENT
-   */
-
-  const ceremony = upcomingEvents[0];
-
-  /**
-   * EVENT TYPE
-   */
-
-  const isRetreat =
-    ceremony.type === "retreat";
-
-  /**
-   * PRIMARY DATE
-   */
-
-  const eventDate = !isRetreat
-    ? new Date(ceremony.date)
-    : new Date(ceremony.startDate);
-
-  /**
-   * COUNTDOWN
-   */
-
-  const calculateTimeLeft = () => {
+  const ceremony = useMemo(() => {
     const now = new Date();
 
-    const difference =
-      eventDate.getTime() - now.getTime();
+    const upcomingEvents = allEvents
+      .filter((event) => {
+        const startDate =
+          event.type === "retreat"
+            ? new Date(event.startDate)
+            : new Date(event.date);
 
-    if (difference > 0) {
-      return {
-        days: Math.floor(
-          difference /
-            (1000 * 60 * 60 * 24),
-        ),
+        return startDate.getTime() > now.getTime();
+      })
+      .sort((a, b) => {
+        const aDate =
+          a.type === "retreat"
+            ? new Date(a.startDate).getTime()
+            : new Date(a.date).getTime();
 
-        hours: Math.floor(
-          (difference /
-            (1000 * 60 * 60)) %
-            24,
-        ),
+        const bDate =
+          b.type === "retreat"
+            ? new Date(b.startDate).getTime()
+            : new Date(b.date).getTime();
 
-        minutes: Math.floor(
-          (difference / 1000 / 60) % 60,
-        ),
-      };
-    }
+        return aDate - bDate;
+      });
 
-    return {
-      days: 0,
-      hours: 0,
-      minutes: 0,
-    };
-  };
+    return upcomingEvents[0] as CeremonyEventDetail | undefined;
+  }, [allEvents]);
 
-  const [timeLeft, setTimeLeft] =
-    useState<TimeLeft>(
-      calculateTimeLeft(),
-    );
+  const isRetreat = ceremony?.type === "retreat";
+
+  const eventDate = useMemo(() => {
+    if (!ceremony) return null;
+
+    return !isRetreat
+      ? new Date(ceremony.date)
+      : new Date(ceremony.startDate);
+  }, [ceremony, isRetreat]);
 
   useEffect(() => {
-    setIsClient(true);
-
     const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft());
+      setTimeLeft(getTimeLeft(eventDate));
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [eventDate]);
+
   const countdownItems = [
     {
       label: "days",
       value: timeLeft.days,
     },
-
     {
       label: "hrs",
       value: timeLeft.hours,
     },
-
     {
       label: "mins",
       value: timeLeft.minutes,
     },
   ];
+
+  if (!ceremony) {
+    return null;
+  }
 
   return (
     <>
@@ -210,25 +177,20 @@ export default function UpcomingEventSection() {
         <div className="absolute inset-0">
           <Image
             src={ceremony.heroImage}
-            alt={ceremony.heroImageAlt}
+            alt={ceremony.heroImageAlt || ceremony.title}
             fill
             priority
             className="object-cover opacity-30"
           />
 
           <div className="absolute inset-0 bg-black/50" />
-
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70" />
         </div>
 
         <div className="relative z-10 mx-auto flex max-w-7xl flex-col gap-10 px-6 lg:flex-row lg:items-center lg:justify-between lg:px-10">
           <div className="max-w-2xl">
             <EventBadge
-              title={
-                isRetreat
-                  ? "Upcoming Retreat"
-                  : "Upcoming Ceremony"
-              }
+              title={isRetreat ? "Upcoming Retreat" : "Upcoming Ceremony"}
             />
 
             <motion.h2
@@ -258,52 +220,32 @@ export default function UpcomingEventSection() {
             <div className="mt-8 flex flex-wrap items-center gap-3">
               {isRetreat ? (
                 <CalendarRetreatDateBadge
-                  startDay={String(
-                    new Date(
-                      ceremony.startDate,
-                    ).getDate(),
+                  startDay={String(new Date(ceremony.startDate).getDate())}
+                  startMonth={new Date(ceremony.startDate).toLocaleString(
+                    "en-US",
+                    {
+                      month: "short",
+                    },
                   )}
-                  startMonth={new Date(
-                    ceremony.startDate,
-                  ).toLocaleString("en-US", {
-                    month: "short",
-                  })}
                   startYear={String(
-                    new Date(
-                      ceremony.startDate,
-                    ).getFullYear(),
+                    new Date(ceremony.startDate).getFullYear(),
                   )}
-                  endDay={String(
-                    new Date(
-                      ceremony.endDate,
-                    ).getDate(),
+                  endDay={String(new Date(ceremony.endDate).getDate())}
+                  endMonth={new Date(ceremony.endDate).toLocaleString(
+                    "en-US",
+                    {
+                      month: "short",
+                    },
                   )}
-                  endMonth={new Date(
-                    ceremony.endDate,
-                  ).toLocaleString("en-US", {
-                    month: "short",
-                  })}
-                  endYear={String(
-                    new Date(
-                      ceremony.endDate,
-                    ).getFullYear(),
-                  )}
+                  endYear={String(new Date(ceremony.endDate).getFullYear())}
                 />
               ) : (
                 <CalendarSingleDayDateBadge
-                  day={String(
-                    new Date(
-                      ceremony.date,
-                    ).getDate(),
-                  )}
-                  month={new Date(
-                    ceremony.date,
-                  ).toLocaleString("en-US", {
+                  day={String(new Date(ceremony.date).getDate())}
+                  month={new Date(ceremony.date).toLocaleString("en-US", {
                     month: "short",
                   })}
-                  weekday={new Date(
-                    ceremony.date,
-                  ).toLocaleString("en-US", {
+                  weekday={new Date(ceremony.date).toLocaleString("en-US", {
                     weekday: "short",
                   })}
                 />
@@ -314,7 +256,7 @@ export default function UpcomingEventSection() {
               </div>
             </div>
 
-            <div className="mt-8 flex items-center gap-6">
+            <div className="mt-8 flex flex-wrap items-center gap-6">
               <a
                 href={ceremony.reserveUrl}
                 className="inline-flex items-center justify-center rounded-full bg-[#D7C7A3] px-6 py-3 text-sm font-medium tracking-wide text-[#06110B] transition-all duration-300 hover:scale-[1.02]"
@@ -327,23 +269,16 @@ export default function UpcomingEventSection() {
                 className="inline-flex items-center gap-3 text-sm text-[#F6F1E8]/80 transition-colors duration-300 hover:text-white"
               >
                 <WhatsAppIcon className="h-6 w-6" />
-
-                <span>
-                  {ceremony.whatsapp.buttonText}
-                </span>
+                <span>{ceremony.whatsapp.buttonText}</span>
               </a>
             </div>
 
             <div className="mt-10">
               <p className="text-sm tracking-wide text-[#D7C7A3]/70 uppercase">
-                Limited spaces available for this week's ceremony.
+                Limited spaces available for this week&apos;s ceremony.
               </p>
 
-              <ViewDetailsButton
-                onClick={() =>
-                  setDetailsOpen(true)
-                }
-              />
+              <ViewDetailsButton onClick={() => setDetailsOpen(true)} />
             </div>
           </div>
 
@@ -354,11 +289,7 @@ export default function UpcomingEventSection() {
                 className="rounded-3xl border border-white/10 bg-white/5 px-5 py-8 text-center shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-2xl"
               >
                 <div className="text-4xl font-light text-[#F6F1E8] md:text-5xl">
-                  {isClient
-                    ? String(
-                        item.value,
-                      ).padStart(2, "0")
-                    : "00"}
+                  {String(item.value).padStart(2, "0")}
                 </div>
 
                 <div className="mt-2 text-xs tracking-[0.18em] text-[#D7C7A3]/70 uppercase">
@@ -372,9 +303,7 @@ export default function UpcomingEventSection() {
 
       <EventDetailOverlay
         open={detailsOpen}
-        onClose={() =>
-          setDetailsOpen(false)
-        }
+        onClose={() => setDetailsOpen(false)}
         event={ceremony}
       />
     </>

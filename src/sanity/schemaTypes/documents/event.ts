@@ -3,18 +3,23 @@ import {
   defineType,
 } from "sanity";
 
-function getEventSlugPrefix(
-  eventType?: string,
-) {
+type EventPreviewSelection = {
+  title?: string;
+  media?: string;
+  eventType?: string;
+  singleDate?: string;
+  startDate?: string;
+  slug?: string;
+};
+
+function getEventSlugPrefix(eventType?: unknown) {
   return eventType === "retreat"
     ? "retreat"
     : "ceremony";
 }
 
-function getSlugDatePart(
-  rawDate?: string,
-) {
-  if (!rawDate) {
+function getSlugDatePart(rawDate?: unknown) {
+  if (typeof rawDate !== "string") {
     return "";
   }
 
@@ -51,27 +56,22 @@ export const event = defineType({
       name: "basic",
       title: "Basic",
     },
-
     {
       name: "dates",
       title: "Dates",
     },
-
     {
       name: "media",
       title: "Media",
     },
-
     {
       name: "content",
       title: "Content",
     },
-
     {
       name: "detailView",
       title: "Detail View",
     },
-
     {
       name: "seo",
       title: "SEO",
@@ -84,7 +84,6 @@ export const event = defineType({
       title: "Title",
       type: "string",
       group: "basic",
-
       validation: (Rule) =>
         Rule.required(),
     }),
@@ -93,21 +92,22 @@ export const event = defineType({
       name: "slug",
       title: "Slug",
       type: "slug",
-
       options: {
-        source: (
-          document: any,
-        ) => {
+        source: (document) => {
           const eventType =
             getEventSlugPrefix(
               document?.eventType,
             );
 
           const title =
-            document?.title || "event";
+            typeof document?.title ===
+            "string"
+              ? document.title
+              : "event";
 
           const rawDate =
-            document?.eventType === "retreat"
+            document?.eventType ===
+            "retreat"
               ? document?.startDate
               : document?.singleDate;
 
@@ -128,10 +128,8 @@ export const event = defineType({
             .replace(/\s+/g, "-")
             .replace(/--+/g, "-"),
       },
-
       validation: (Rule) =>
         Rule.required(),
-
       group: "basic",
     }),
 
@@ -139,26 +137,21 @@ export const event = defineType({
       name: "eventType",
       title: "Event Type",
       type: "string",
-
       options: {
         list: [
           {
             title: "Single Day Ceremony",
             value: "single-day",
           },
-
           {
             title: "Retreat",
             value: "retreat",
           },
         ],
-
         layout: "radio",
       },
-
       validation: (Rule) =>
         Rule.required(),
-
       group: "basic",
     }),
 
@@ -166,9 +159,7 @@ export const event = defineType({
       name: "shortDescription",
       title: "Short Description",
       type: "text",
-
       rows: 3,
-
       group: "basic",
     }),
 
@@ -178,9 +169,7 @@ export const event = defineType({
       description:
         "Example: Limited spaces available for this ceremony.",
       type: "text",
-
       rows: 2,
-
       group: "detailView",
     }),
 
@@ -188,13 +177,11 @@ export const event = defineType({
       name: "longDescription",
       title: "Long Description",
       type: "array",
-
       of: [
         {
           type: "block",
         },
       ],
-
       group: "content",
     }),
 
@@ -202,10 +189,8 @@ export const event = defineType({
       name: "singleDate",
       title: "Single Ceremony Date",
       type: "datetime",
-
       hidden: ({ document }) =>
         document?.eventType !== "single-day",
-
       group: "dates",
     }),
 
@@ -213,10 +198,8 @@ export const event = defineType({
       name: "startDate",
       title: "Retreat Start Date",
       type: "datetime",
-
       hidden: ({ document }) =>
         document?.eventType !== "retreat",
-
       group: "dates",
     }),
 
@@ -224,10 +207,8 @@ export const event = defineType({
       name: "endDate",
       title: "Retreat End Date",
       type: "datetime",
-
       hidden: ({ document }) =>
         document?.eventType !== "retreat",
-
       group: "dates",
     }),
 
@@ -244,11 +225,9 @@ export const event = defineType({
       description:
         "Optional icon shown beside the event title. If empty, the default Aya icon will be used.",
       type: "image",
-
       options: {
         hotspot: true,
       },
-
       group: "media",
     }),
 
@@ -258,11 +237,9 @@ export const event = defineType({
       description:
         "Image shown on the event card.",
       type: "image",
-
       options: {
         hotspot: true,
       },
-
       group: "media",
     }),
 
@@ -272,11 +249,9 @@ export const event = defineType({
       description:
         "Large image shown inside the ceremony or retreat detail modal.",
       type: "image",
-
       options: {
         hotspot: true,
       },
-
       group: "detailView",
     }),
 
@@ -286,32 +261,26 @@ export const event = defineType({
       description:
         "Add icon and text feature items shown in the detail view.",
       type: "array",
-
       of: [
         {
           type: "object",
-
           fields: [
             defineField({
               name: "icon",
               title: "Icon",
               type: "image",
-
               options: {
                 hotspot: true,
               },
             }),
-
             defineField({
               name: "text",
               title: "Text",
               type: "string",
-
               validation: (Rule) =>
                 Rule.required(),
             }),
           ],
-
           preview: {
             select: {
               title: "text",
@@ -320,7 +289,6 @@ export const event = defineType({
           },
         },
       ],
-
       group: "detailView",
     }),
 
@@ -328,10 +296,8 @@ export const event = defineType({
       name: "whatsappTitle",
       title: "WhatsApp Section Title",
       type: "string",
-
       initialValue:
         "Have questions or need guidance?",
-
       group: "detailView",
     }),
 
@@ -340,12 +306,9 @@ export const event = defineType({
       title:
         "WhatsApp Section Description",
       type: "text",
-
       rows: 2,
-
       initialValue:
         "Click and connect with us on WhatsApp.",
-
       group: "detailView",
     }),
 
@@ -353,9 +316,7 @@ export const event = defineType({
       name: "whatsappButtonLabel",
       title: "WhatsApp Button Label",
       type: "string",
-
       initialValue: "Connect",
-
       group: "detailView",
     }),
 
@@ -365,7 +326,6 @@ export const event = defineType({
       description:
         "Use international format without spaces or plus sign. Example: 51999999999",
       type: "string",
-
       group: "detailView",
     }),
 
@@ -387,9 +347,7 @@ export const event = defineType({
       name: "seoDescription",
       title: "SEO Description",
       type: "text",
-
       rows: 3,
-
       group: "seo",
     }),
 
@@ -397,11 +355,9 @@ export const event = defineType({
       name: "seoImage",
       title: "SEO Image",
       type: "image",
-
       options: {
         hotspot: true,
       },
-
       group: "seo",
     }),
   ],
@@ -424,7 +380,7 @@ export const event = defineType({
         singleDate,
         startDate,
         slug,
-      } = selection;
+      } = selection as EventPreviewSelection;
 
       const rawDate =
         eventType === "retreat"
