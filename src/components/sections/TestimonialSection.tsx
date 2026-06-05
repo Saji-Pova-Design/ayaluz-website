@@ -133,14 +133,12 @@ export default function TestimonialsSection({ data }: TestimonialsSectionProps) 
   const [isHovered, setIsHovered] = useState(false)
 
   const hasTestimonials = testimonials.length > 0
-  const safeCurrentIndex =
-    hasTestimonials && currentIndex <= testimonials.length - 1 ? currentIndex : 0
 
   const nextSlide = () => {
     if (!hasTestimonials) return
 
     setCurrentIndex((prev) =>
-      prev >= testimonials.length - 1 ? 0 : prev + 1,
+      prev === testimonials.length - 1 ? 0 : prev + 1,
     )
   }
 
@@ -148,7 +146,7 @@ export default function TestimonialsSection({ data }: TestimonialsSectionProps) 
     if (!hasTestimonials) return
 
     setCurrentIndex((prev) =>
-      prev <= 0 ? testimonials.length - 1 : prev - 1,
+      prev === 0 ? testimonials.length - 1 : prev - 1,
     )
   }
 
@@ -157,15 +155,21 @@ export default function TestimonialsSection({ data }: TestimonialsSectionProps) 
 
     const interval = setInterval(() => {
       setCurrentIndex((prev) =>
-        prev >= testimonials.length - 1 ? 0 : prev + 1,
+        prev === testimonials.length - 1 ? 0 : prev + 1,
       )
     }, 6500)
 
     return () => clearInterval(interval)
   }, [hasTestimonials, testimonials.length, isHovered])
 
+  useEffect(() => {
+    if (currentIndex > testimonials.length - 1) {
+      setCurrentIndex(0)
+    }
+  }, [currentIndex, testimonials.length])
+
   return (
-    <section className="w-full overflow-hidden bg-[#F6F1E8] py-20 md:py-32">
+    <section className="w-full overflow-hidden bg-[#F6F1E8] py-10 md:py-24">
       <div className="mx-auto max-w-[1440px] px-4 md:px-6 lg:px-10">
         <div className="mx-auto mb-12 max-w-[760px] text-center md:mb-18">
           {data?.eyebrow && (
@@ -211,7 +215,7 @@ export default function TestimonialsSection({ data }: TestimonialsSectionProps) 
               {hasTestimonials ? (
                 <AnimatePresence mode="wait">
                   <motion.div
-                    key={safeCurrentIndex}
+                    key={currentIndex}
                     initial={{ opacity: 0, y: 18 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -18 }}
@@ -220,7 +224,7 @@ export default function TestimonialsSection({ data }: TestimonialsSectionProps) 
                       ease: [0.32, 0.72, 0.36, 1],
                     }}
                   >
-                    <TestimonialsCard testimonial={testimonials[safeCurrentIndex]} />
+                    <TestimonialsCard testimonial={testimonials[currentIndex]} />
                   </motion.div>
                 </AnimatePresence>
               ) : (
@@ -233,21 +237,37 @@ export default function TestimonialsSection({ data }: TestimonialsSectionProps) 
             </div>
 
             {testimonials.length > 1 && (
-              <div className="mt-6 flex items-center justify-center gap-4 md:hidden">
+              <div className="mt-6 flex items-center justify-center gap-5 md:hidden">
                 <button
                   type="button"
                   onClick={previousSlide}
                   aria-label="Previous testimonial"
-                  className="flex h-[48px] w-[48px] items-center justify-center rounded-full bg-[#2B4A40] text-[22px] text-white"
+                  className="flex h-[46px] w-[46px] items-center justify-center rounded-full bg-[#2B4A40] text-[20px] text-white transition duration-300 active:scale-95"
                 >
                   ←
                 </button>
+
+                <div className="flex min-w-[72px] items-center justify-center gap-2">
+                  {testimonials.map((testimonial, index) => (
+                    <button
+                      key={testimonial._key || testimonial.id || index}
+                      type="button"
+                      onClick={() => setCurrentIndex(index)}
+                      aria-label={`Go to testimonial ${index + 1}`}
+                      className={`h-2.5 rounded-full transition-all duration-300 ${
+                        currentIndex === index
+                          ? 'w-7 bg-[#2B4A40]'
+                          : 'w-2.5 bg-[#2B4A40]/30'
+                      }`}
+                    />
+                  ))}
+                </div>
 
                 <button
                   type="button"
                   onClick={nextSlide}
                   aria-label="Next testimonial"
-                  className="flex h-[48px] w-[48px] items-center justify-center rounded-full bg-[#2B4A40] text-[22px] text-white"
+                  className="flex h-[46px] w-[46px] items-center justify-center rounded-full bg-[#2B4A40] text-[20px] text-white transition duration-300 active:scale-95"
                 >
                   →
                 </button>
@@ -256,7 +276,7 @@ export default function TestimonialsSection({ data }: TestimonialsSectionProps) 
           </div>
 
           {testimonials.length > 1 && (
-            <div className="mt-8 flex items-center justify-center gap-3">
+            <div className="mt-8 hidden items-center justify-center gap-3 md:flex">
               {testimonials.map((testimonial, index) => (
                 <button
                   key={testimonial._key || testimonial.id || index}
@@ -264,7 +284,7 @@ export default function TestimonialsSection({ data }: TestimonialsSectionProps) 
                   onClick={() => setCurrentIndex(index)}
                   aria-label={`Go to testimonial ${index + 1}`}
                   className={`h-2.5 rounded-full transition-all duration-300 ${
-                    safeCurrentIndex === index
+                    currentIndex === index
                       ? 'w-8 bg-[#2B4A40]'
                       : 'w-2.5 bg-[#2B4A40]/30'
                   }`}

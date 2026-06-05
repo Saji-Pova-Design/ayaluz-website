@@ -3,6 +3,9 @@ import { groq } from "next-sanity";
 export const eventFields = groq`
   _id,
   title,
+  displayTitle,
+  displaySubtitle,
+  displayIcon,
   "slug": slug.current,
   eventType,
   shortDescription,
@@ -13,7 +16,6 @@ export const eventFields = groq`
   endDate,
   timeRange,
   reservationUrl,
-  eventIcon,
   cardImage,
   detailedViewImage,
   features,
@@ -21,6 +23,30 @@ export const eventFields = groq`
   whatsappDescription,
   whatsappButtonLabel,
   whatsappPhoneNumber
+`;
+
+export const siteSettingsQuery = groq`
+  *[_type == "siteSettings"][0] {
+    promoBanner {
+      enabled,
+      title,
+      text,
+      button {
+        label,
+        href
+      }
+    },
+
+    navbar {
+      brandName,
+      logo,
+      items[] {
+        _key,
+        label,
+        href
+      }
+    }
+  }
 `;
 
 export const pageBySlugQuery = groq`
@@ -37,11 +63,24 @@ export const pageBySlugQuery = groq`
     pageBuilder[] {
       ...,
 
+      _type == "promoBannerSection" => {
+        _type,
+        _key,
+        enabled,
+        title,
+        text,
+        button
+      },
+
       _type == "calendarSection" => {
         ...,
-        manualEvents[]-> {
-          ${eventFields}
-        }
+        "manualEvents": *[
+    _type == "event" &&
+    defined(coalesce(singleDate, startDate)) &&
+    coalesce(singleDate, startDate) >= now()
+  ] | order(coalesce(singleDate, startDate) asc) {
+    ${eventFields}
+  }
       },
 
       _type == "upcomingSection" => {
@@ -56,6 +95,7 @@ export const pageBySlugQuery = groq`
 
         "automaticEvents": *[
           _type == "event" &&
+          defined(coalesce(singleDate, startDate)) &&
           coalesce(singleDate, startDate) >= now()
         ] | order(coalesce(singleDate, startDate) asc) [0...12] {
           ${eventFields}

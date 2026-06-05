@@ -3,6 +3,7 @@ import CalendarSection from "../sections/CalendarSection";
 import UpcomingSection from "../sections/UpcomingSection";
 import TestimonialsSection from "../sections/TestimonialSection";
 import FAQSection from "../sections/FAQSection";
+import { PromoBanner } from "../general-shared/PromoBanner";
 
 type PageBuilderSection = {
   _key?: string;
@@ -21,6 +22,8 @@ export default function PageBuilder({ sections = [] }: Props) {
         const key = section._key || `${section._type || "section"}-${index}`;
 
         switch (section._type) {
+        
+
           case "heroSection":
             return <HeroSection key={key} data={section as never} />;
 

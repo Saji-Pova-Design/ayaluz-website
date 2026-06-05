@@ -34,7 +34,7 @@ export const upcomingSection = defineType({
       name: "items",
       title: "Upcoming Blocks",
       description:
-        "Add one block for each upcoming feature. Each block can be automatic or manual.",
+        "Add one block for each upcoming event card. Each block can choose the event automatically or manually.",
       type: "array",
 
       initialValue: [
@@ -51,6 +51,7 @@ export const upcomingSection = defineType({
       of: [
         {
           type: "object",
+          name: "upcomingBlock",
           title: "Upcoming Block",
 
           fields: [
@@ -75,18 +76,22 @@ export const upcomingSection = defineType({
                   },
                 ],
               },
+
+              validation: (Rule) =>
+                Rule.required(),
             }),
 
             defineField({
               name: "event",
               title: "Manual Event",
+              description:
+                "Only used when selection mode is Manual. Automatic mode uses the closest upcoming event.",
               type: "reference",
               to: [
                 {
                   type: "event",
                 },
               ],
-
               weak: true,
 
               options: {
@@ -102,7 +107,7 @@ export const upcomingSection = defineType({
               name: "backgroundImage",
               title: "Background Image",
               description:
-                "Optional. If empty, the event detail image or card image will be used.",
+                "Optional. If empty, the event detail image or event card image will be used.",
               type: "image",
 
               options: {
@@ -136,24 +141,38 @@ export const upcomingSection = defineType({
 
           preview: {
             select: {
-              title: "event.title",
               selectionMode: "selectionMode",
+              eventTitle: "event.title",
+              eventDisplayTitle: "event.displayTitle",
+              eventDisplaySubtitle:
+                "event.displaySubtitle",
+              eventDisplayIcon: "event.displayIcon",
+              eventIcon: "event.eventIcon",
               badgeLabel: "badgeLabel",
-              media: "backgroundImage",
+              backgroundImage: "backgroundImage",
             },
 
             prepare(selection) {
+              const title =
+                selection.eventDisplayTitle ||
+                selection.eventTitle ||
+                (selection.selectionMode === "manual"
+                  ? "Manual upcoming block"
+                  : "Automatic upcoming block");
+
+              const subtitleParts = [
+                selection.eventDisplaySubtitle,
+                selection.badgeLabel,
+                selection.selectionMode,
+              ].filter(Boolean);
+
               return {
-                title:
-                  selection.title ||
-                  (selection.selectionMode ===
-                  "manual"
-                    ? "Manual upcoming block"
-                    : "Automatic upcoming block"),
-                subtitle:
-                  selection.badgeLabel ||
-                  selection.selectionMode,
-                media: selection.media,
+                title,
+                subtitle: subtitleParts.join(" • "),
+                media:
+                  selection.eventDisplayIcon ||
+                  selection.eventIcon ||
+                  selection.backgroundImage,
               };
             },
           },
@@ -174,7 +193,7 @@ export const upcomingSection = defineType({
           selection.title ||
           "Upcoming Section",
         subtitle: `${
-          selection.items?.length || 1
+          selection.items?.length || 0
         } upcoming block(s)`,
       };
     },

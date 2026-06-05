@@ -1,7 +1,4 @@
-import {
-  defineField,
-  defineType,
-} from "sanity";
+import { defineField, defineType } from "sanity";
 
 export const page = defineType({
   name: "page",
@@ -59,6 +56,10 @@ export const page = defineType({
 
       of: [
         {
+          type: "promoBannerSection",
+        },
+
+        {
           type: "heroSection",
         },
 
@@ -76,6 +77,10 @@ export const page = defineType({
 
         {
           type: "testimonialSection",
+        },
+
+        {
+          type: "richTextSection",
         },
       ],
     }),
