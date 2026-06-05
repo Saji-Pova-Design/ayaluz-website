@@ -11,8 +11,10 @@ async function getHomePageData() {
         slug: "home",
       },
       {
-        cache: "no-store",
-      },
+        next: {
+          revalidate: 60,
+        },
+      }
     );
   } catch (error) {
     console.error("SANITY ERROR:", error);
