@@ -23,30 +23,32 @@ async function getHomePageData() {
 export default async function HomePage() {
   const page = await getHomePageData();
 
-  if (!page) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F6F1E8] px-6 text-center">
-        <div className="max-w-[640px]">
-          <p className="mb-4 text-[12px] uppercase tracking-[0.24em] text-[#2B4A40]/60">
-            Content Loading Error
-          </p>
-
-          <h1 className="font-canela text-[42px] leading-[1] tracking-[-0.05em] text-[#111111] md:text-[64px]">
-            Unable to load homepage content
-          </h1>
-
-          <p className="mt-6 text-[16px] leading-[1.8] text-[#222222]/70 md:text-[18px]">
-            There was an issue fetching content from Sanity. Please check your
-            environment variables, dataset configuration, or query structure.
-          </p>
-        </div>
-      </main>
-    );
-  }
-
   return (
-    <main className="min-h-screen">
-      <PageBuilder sections={page?.pageBuilder ?? []} />
+    <main className="min-h-screen bg-[#F6F1E8]">
+      <pre className="whitespace-pre-wrap break-words p-6 text-[12px] leading-relaxed text-black">
+        {JSON.stringify(
+          {
+            sanityProjectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
+            sanityDataset: process.env.NEXT_PUBLIC_SANITY_DATASET,
+            sanityApiVersion: process.env.NEXT_PUBLIC_SANITY_API_VERSION,
+            pageExists: Boolean(page),
+            pageId: page?._id,
+            pageTitle: page?.title,
+            pageSlug: page?.slug,
+            pageBuilderCount: page?.pageBuilder?.length ?? 0,
+            pageBuilderTypes:
+              page?.pageBuilder?.map((section: { _type?: string }) => section?._type) ??
+              [],
+            rawPage: page,
+          },
+          null,
+          2,
+        )}
+      </pre>
+
+      {page?.pageBuilder?.length ? (
+        <PageBuilder sections={page.pageBuilder} />
+      ) : null}
     </main>
   );
 }
