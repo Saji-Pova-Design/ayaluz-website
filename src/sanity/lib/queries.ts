@@ -24,10 +24,11 @@ export const eventFields = groq`
 `;
 
 export const pageBySlugQuery = groq`
-  *[_type == "page" && slug.current == $slug][0] {
+  *[slug.current == $slug][0] {
     _id,
+    _type,
     title,
-    slug,
+    "slug": slug.current,
     seoTitle,
     seoDescription,
     navigationTitle,
