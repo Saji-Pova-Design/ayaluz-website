@@ -5,17 +5,11 @@ import { schemaTypes } from "./src/sanity/schemaTypes";
 
 export default defineConfig({
   name: "default",
-
   title: "AYALUZ",
-
   projectId: "iicafgfn",
-
-  dataset: "ayaluz-dataset",
-
+  dataset: "clean-production",
   basePath: "/studio",
-
   plugins: [structureTool()],
-
   schema: {
     types: schemaTypes,
   },

@@ -1,21 +1,15 @@
 "use client";
 
 import {
-  useEffect,
   useMemo,
   useState,
 } from "react";
-
+import EventDetailsModal from "@/components/sections/shared/EventDetailsModal";
 import Image from "next/image";
 import { PortableText } from "@portabletext/react";
+import EventDateBadge from "../shared/EventDateBadge";
 
 import { urlFor } from "@/sanity/lib/image";
-
-const AYALUZ_LOCATION = {
-  name: "AyaLuz Temple, Sacred Valley",
-  googleMapsUrl:
-    "https://www.google.com/maps?q=-13.4822877,-71.7929999",
-};
 
 type SanityImage = {
   asset?: {
@@ -47,21 +41,51 @@ type EventItem = {
   displayIcon?: SanityImage | null;
   slug?: string;
   eventType?: "single-day" | "retreat";
+
   shortDescription?: string;
   announcementNote?: string;
   longDescription?: PortableTextBlock[];
+
+  showShortDescriptionOnCard?: boolean;
+  showAnnouncementOnCard?: boolean;
+  showLongDescriptionOnCard?: boolean;
+
+  showReserveCtaOnCard?: boolean;
+  cardReserveCtaLabel?: string;
+
   singleDate?: string | null;
   startDate?: string | null;
   endDate?: string | null;
   timeRange?: string | null;
   reservationUrl?: string | null;
+
   cardImage?: SanityImage | null;
   detailedViewImage?: SanityImage | null;
+
+  useCardDateBadgeInDetail?: boolean;
+  useCardImageInDetail?: boolean;
+
+  showShortDescriptionInDetail?: boolean;
+  showAnnouncementInDetail?: boolean;
+  showLongDescriptionInDetail?: boolean;
+
+  showCountdown?: boolean;
+  showLocation?: boolean;
+
+  showReserveCtaInDetail?: boolean;
+  detailReserveCtaLabel?: string;
+
   features?: FeatureItem[];
+
   whatsappTitle?: string;
   whatsappDescription?: string;
   whatsappButtonLabel?: string;
   whatsappPhoneNumber?: string;
+
+  showShareCta?: boolean;
+  shareTitle?: string;
+  shareDescription?: string;
+  sharePreviewImage?: SanityImage | null;
 };
 
 type CalendarSectionData = {
@@ -198,148 +222,6 @@ function isBeforeMonth(
   );
 }
 
-function getDateParts(date?: string | null) {
-  if (!date) {
-    return null;
-  }
-
-  const parsedDate = new Date(date);
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return null;
-  }
-
-  return {
-    day: String(parsedDate.getDate()),
-    month: parsedDate.toLocaleDateString("en-US", {
-      month: "long",
-    }),
-    weekday: parsedDate.toLocaleDateString("en-US", {
-      weekday: "long",
-    }),
-    year: String(parsedDate.getFullYear()),
-  };
-}
-
-function EventIdentity({
-  event,
-}: {
-  event: EventItem;
-}) {
-  return (
-    <div className="min-w-0 leading-none">
-      <h3 className="font-serif font-semibold text-3xl leading-[0.95] tracking-[-0.06em] text-[#1B1713] md:text-3xl">
-        {event.displayTitle || event.title}
-      </h3>
-
-      {event.displaySubtitle && (
-        <p className="mt-2 text-sm uppercase tracking-[0.28em] text-[#7A5F3C] md:text-base">
-          {event.displaySubtitle}
-        </p>
-      )}
-    </div>
-  );
-}
-
-function SingleDayDateBadge({
-  date,
-}: {
-  date?: string | null;
-}) {
-  const dateParts = getDateParts(date);
-
-  if (!dateParts) {
-    return null;
-  }
-
-  return (
-    <div className="flex items-center gap-5 p-0">
-      <div className="flex h-12 w-12 items-center justify-center rounded-[10px] border border-[#28543B] md:h-16 md:w-16 md:rounded-[16px]">
-        <span className="text-2xl font-bold tracking-[-0.05em] md:text-3xl">
-          {dateParts.day}
-        </span>
-      </div>
-
-      <div>
-        <div className="text-lg font-bold tracking-[-0.05em] md:text-2xl">
-          {dateParts.month}
-        </div>
-
-        <div className="mt-0 text-base md:text-large">
-          {dateParts.weekday}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function RetreatDateBadge({
-  startDate,
-  endDate,
-}: {
-  startDate?: string | null;
-  endDate?: string | null;
-}) {
-  const start = getDateParts(startDate);
-  const end = getDateParts(endDate);
-
-  if (!start || !end) {
-    return null;
-  }
-
-  return (
-    <div className="flex items-start gap-4 p-0 md:gap-5">
-      {[start, end].map((date, index) => (
-        <div
-          key={`${date.day}-${date.month}-${date.year}`}
-          className="flex items-center gap-4 md:gap-5"
-        >
-          {index === 1 && (
-            <div className="h-px w-5 bg-[#28543B] md:w-8" />
-          )}
-
-          <div className="flex items-center gap-3 md:gap-4">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[10px] border border-[#28543B] md:h-16 md:w-16 md:rounded-[16px]">
-              <span className="text-2xl font-bold tracking-[-0.05em] md:text-3xl">
-                {date.day}
-              </span>
-            </div>
-
-            <div className="leading-none">
-              <div className="text-lg font-bold tracking-[-0.05em] md:text-2xl">
-                {date.month}
-              </div>
-
-              <div className="mt-1 text-[10px] uppercase tracking-[0.22em] text-[#7A5F3C] md:text-xs">
-                {date.year}
-              </div>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function EventDateBadge({
-  event,
-}: {
-  event: EventItem;
-}) {
-  if (event.eventType === "retreat") {
-    return (
-      <RetreatDateBadge
-        startDate={event.startDate}
-        endDate={event.endDate}
-      />
-    );
-  }
-
-  return (
-    <SingleDayDateBadge date={event.singleDate} />
-  );
-}
-
 function EventCardImage({
   event,
 }: {
@@ -365,6 +247,26 @@ function EventCardImage({
   );
 }
 
+function EventIdentity({
+  event,
+}: {
+  event: EventItem;
+}) {
+  return (
+    <div className="min-w-0 leading-none">
+      <h3 className="font-serif font-semibold text-3xl leading-[0.95] tracking-[-0.06em] text-[#1B1713] md:text-3xl">
+        {event.displayTitle || event.title}
+      </h3>
+
+      {event.displaySubtitle && (
+        <p className="mt-2 text-sm uppercase tracking-[0.28em] text-[#7A5F3C] md:text-base">
+          {event.displaySubtitle}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function EventCard({
   event,
   onOpen,
@@ -382,24 +284,44 @@ function EventCard({
 
           <EventDateBadge event={event} />
 
-          {event.shortDescription && (
-            <p className="max-w-[640px] text-base leading-[1.75] text-[#1A1A1A] md:text-lg">
-              {event.shortDescription}
-            </p>
-          )}
+          {event.showAnnouncementOnCard !== false &&
+            event.announcementNote && (
+              <div className="rounded-[18px] border border-[#D7C1A1] bg-[#FFF7EA] px-4 py-3 text-sm leading-[1.6] text-[#7A5F3C]">
+                {event.announcementNote}
+              </div>
+            )}
 
-<div className="flex flex-row gap-3">
-            <a
-              href={event.reservationUrl || "#"}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex h-12 flex-1 items-center justify-center rounded-full bg-[#2B4A40] px-7 text-sm font-medium text-[#FFFAF1] transition-all duration-300 hover:bg-[#1F3E35]"
-            >
-              <span className="sm:hidden">Reserve</span>
-<span className="hidden sm:inline">
-  Reserve Your Spot
-</span>
-            </a>
+          {event.showShortDescriptionOnCard !== false &&
+            event.shortDescription && (
+              <p className="max-w-[640px] text-base leading-[1.75] text-[#1A1A1A] md:text-lg">
+                {event.shortDescription}
+              </p>
+            )}
+
+          {event.showLongDescriptionOnCard &&
+            event.longDescription && (
+              <div className="prose prose-neutral max-w-none prose-p:leading-[1.75] prose-p:text-[#1A1A1A]">
+                <PortableText value={event.longDescription} />
+              </div>
+            )}
+
+          <div className="flex flex-row gap-3">
+          {event.showReserveCtaOnCard !== false && (
+  <a
+    href={event.reservationUrl || "#"}
+    target="_blank"
+    rel="noreferrer"
+    className="inline-flex h-12 flex-1 items-center justify-center rounded-full bg-[#2B4A40] px-7 text-sm font-medium text-[#FFFAF1] transition-all duration-300 hover:bg-[#1F3E35]"
+  >
+    <span className="sm:hidden">
+      {event.cardReserveCtaLabel || "Reserve"}
+    </span>
+    <span className="hidden sm:inline">
+      {event.cardReserveCtaLabel ||
+        "Reserve Your Spot"}
+    </span>
+  </a>
+)}
 
             <button
               type="button"
@@ -407,9 +329,9 @@ function EventCard({
               className="inline-flex h-12 flex-1 items-center justify-center rounded-full border border-[#2B4A40] px-7 text-sm font-medium text-[#2B4A40] transition-all duration-300 hover:bg-[#2B4A40] hover:text-[#FFFAF1]"
             >
               <span className="sm:hidden">Details</span>
-<span className="hidden sm:inline">
-  View Details
-</span>
+              <span className="hidden sm:inline">
+                View Details
+              </span>
             </button>
           </div>
         </div>
@@ -418,24 +340,40 @@ function EventCard({
   );
 }
 
-function EmptyMonthState({
-  month,
-}: {
-  month: CalendarMonth;
-}) {
+function EmptyMonthState() {
   return (
-    <div className="rounded-[24px] border border-[#2B4A40]/10 bg-[#FFFAF1] px-3 py-2 text-center">
-      <h3 className="font-serif text-3xl tracking-[-0.05em]">
-        We are preparing sacred dates for {getMonthLabel(month)}{" "}
-        {month.year}
-      </h3>
+    <div className="overflow-hidden rounded-[34px] border border-[#2B4A40]/10 bg-[#FFFAF1] shadow-[0_18px_60px_-32px_rgba(20,25,22,0.18)]">
+      <div className="relative h-[280px] md:min-h-[420px] md:h-auto overflow-hidden">
+        <Image
+          src="/images/no-event.png"
+          alt="No events yet"
+          fill
+          sizes="(max-width: 1024px) 100vw, 1152px"
+          className="object-cover"
+        />
 
-      <p className="mx-auto mt-5 max-w-[640px] text-[#5F5548]">
-        New ceremonies and retreats are being lovingly planned.
-      </p>
+        <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/25 to-transparent" />
+
+        <div className="absolute inset-0 flex items-center p-8 md:p-12 lg:p-14">
+        <div>
+  <p className="max-w-[520px] font-serif text-3xl leading-[0.95] tracking-[-0.06em] text-[#F5EFE4] md:text-3xl lg:text-5xl">
+    No events
+    <br />
+    have been opened
+    <br />
+    for this month yet.
+  </p>
+
+  <p className="mt-8 max-w-[420px] text-sm leading-[1.8] tracking-[-0.02em] text-[#C99A5D] md:3xl lg:text-2xl ">
+    New ceremonies and retreats are being lovingly planned.
+  </p>
+</div>
+        </div>
+      </div>
     </div>
   );
 }
+
 
 function CalendarExpandButton({
   label,
@@ -448,144 +386,11 @@ function CalendarExpandButton({
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-2 rounded-full border border-[#2B4A40]/15 bg-[#FFFAF1] px-6 py-1 md:py-2 text-sm transition-all duration-300 hover:bg-[#2B4A40] hover:text-[#FFFAF1]"
+      className="inline-flex items-center gap-2 rounded-full border border-[#2B4A40]/15 bg-[#FFFAF1] px-6 py-1 text-sm transition-all duration-300 hover:bg-[#2B4A40] hover:text-[#FFFAF1] md:py-2"
     >
       {label}
       <span>↓</span>
     </button>
-  );
-}
-
-function EventDetailModal({
-  event,
-  onClose,
-}: {
-  event: EventItem;
-  onClose: () => void;
-}) {
-  const imageUrl =
-    getImageUrl(event.detailedViewImage, 1800, 1200) ||
-    getImageUrl(event.cardImage, 1800, 1200);
-
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, []);
-
-  return (
-    <div
-      className="fixed inset-0 z-[999] flex items-end justify-center bg-black/50 backdrop-blur-md lg:items-center"
-      onClick={onClose}
-    >
-      <div
-        className="relative max-h-[92vh] w-full overflow-y-auto rounded-t-[36px] bg-[#F5EFE4] lg:w-[1120px] lg:rounded-[38px]"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute right-5 top-5 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-black/40 text-xl text-white backdrop-blur-sm"
-        >
-          ✕
-        </button>
-
-        {imageUrl && (
-          <div className="relative h-[260px] overflow-hidden lg:h-[440px]">
-            <Image
-              src={imageUrl}
-              alt={event.displayTitle || event.title || "Event"}
-              fill
-              className="object-cover"
-            />
-          </div>
-        )}
-
-        <div className="p-6 md:p-10">
-          <div className="space-y-10">
-            <EventDateBadge event={event} />
-
-            <EventIdentity event={event} />
-
-            {event.longDescription && (
-              <div className="prose prose-neutral max-w-none prose-p:leading-[1.9]">
-                <PortableText value={event.longDescription} />
-              </div>
-            )}
-
-            {event.features && event.features.length > 0 && (
-              <div className="grid gap-4 md:grid-cols-2">
-                {event.features.map((feature, index) => (
-                  <div
-                    key={index}
-                    className="rounded-[24px] border border-[#2B4A40]/10 bg-[#FFFAF1] p-5"
-                  >
-                    <p className="text-base leading-[1.8]">
-                      {feature.text}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="rounded-[28px] bg-[#D8E8DC] p-7">
-              <h3 className="text-4xl font-bold tracking-[-0.05em]">
-                {event.whatsappTitle ||
-                  "Have questions or need guidance?"}
-              </h3>
-
-              <p className="mt-5 max-w-[700px] text-xl leading-[1.7] text-[#111111]/80">
-                {event.whatsappDescription ||
-                  "Click and connect with us on WhatsApp."}
-              </p>
-
-              {event.whatsappPhoneNumber && (
-                <a
-                  href={`https://wa.me/${event.whatsappPhoneNumber.replace(
-                    /\D/g,
-                    "",
-                  )}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-7 inline-flex h-14 items-center justify-center rounded-full bg-white px-8 text-lg font-semibold text-[#2B4A40]"
-                >
-                  {event.whatsappButtonLabel || "Connect"}
-                </a>
-              )}
-            </div>
-
-            <div className="rounded-[26px] border border-[#2B4A40]/10 bg-[#FFFAF1] p-6">
-              <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#E6EFE8]">
-                  📍
-                </div>
-
-                <div>
-                  <p className="text-xs uppercase tracking-[0.24em] text-[#7A5F3C]">
-                    Location
-                  </p>
-
-                  <p className="mt-1 text-xl font-semibold">
-                    {AYALUZ_LOCATION.name}
-                  </p>
-                </div>
-              </div>
-
-              <a
-                href={AYALUZ_LOCATION.googleMapsUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-6 inline-flex h-11 items-center justify-center rounded-full border border-[#2B4A40] px-5 text-sm font-medium text-[#2B4A40]"
-              >
-                Open Maps
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -658,7 +463,7 @@ export default function CalendarSection({
 
   return (
     <>
-      <section className="bg-[#F5EFE4] px-6 py-6 md:py-8 text-[#1F1A14] md:px-10 lg:px-16">
+      <section className="bg-[#F5EFE4] px-6 py-6 text-[#1F1A14] md:px-10 md:py-8 lg:px-16">
         <div className="mx-auto max-w-6xl">
           <div className="mb-6 max-w-3xl">
             {data.eyebrow && (
@@ -680,7 +485,7 @@ export default function CalendarSection({
             )}
           </div>
 
-          <div className="mb-2 md:mb-4 flex w-fit items-center gap-4 rounded-full border border-[#2B4A40]/10 bg-[#FFFAF1] px-3 py-2 md:gap-6 md:px-5 md:py-4">
+          <div className="mb-2 flex w-fit items-center gap-4 rounded-full border border-[#2B4A40]/10 bg-[#FFFAF1] px-3 py-2 md:mb-4 md:gap-6 md:px-5 md:py-4">
             <button
               type="button"
               onClick={() => {
@@ -699,7 +504,7 @@ export default function CalendarSection({
             </button>
 
             <div className="text-center">
-              <h3 className="font-serif text-2xl md:text-3xl tracking-[-0.05em]">
+              <h3 className="font-serif text-2xl tracking-[-0.05em] md:text-3xl">
                 {getMonthLabel(selectedMonth)}
               </h3>
 
@@ -727,7 +532,7 @@ export default function CalendarSection({
             ))}
 
             {selectedEvents.length === 0 && (
-              <EmptyMonthState month={selectedMonth} />
+              <EmptyMonthState />
             )}
 
             {expandedMonths.map((month) => {
@@ -753,7 +558,7 @@ export default function CalendarSection({
                     ))}
 
                     {monthEvents.length === 0 && (
-                      <EmptyMonthState month={month} />
+                    <EmptyMonthState />
                     )}
                   </div>
                 </div>
@@ -773,7 +578,8 @@ export default function CalendarSection({
       </section>
 
       {activeEvent && (
-        <EventDetailModal
+        <EventDetailsModal
+          open={true}
           event={activeEvent}
           onClose={() => setActiveEvent(null)}
         />

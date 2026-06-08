@@ -39,24 +39,25 @@ export const event = defineType({
   groups: [
     {
       name: "basic",
-      title: "Basic",
+      title: "Event Card Information",
+      default: true,
     },
+
     {
       name: "dates",
       title: "Dates",
     },
-    {
-      name: "media",
-      title: "Media",
-    },
-    {
-      name: "content",
-      title: "Content",
-    },
+
     {
       name: "detailView",
       title: "Detail View",
     },
+
+    {
+      name: "shareView",
+      title: "Share View",
+    },
+
     {
       name: "seo",
       title: "SEO",
@@ -68,22 +69,54 @@ export const event = defineType({
       name: "title",
       title: "Sanity Title",
       description:
-        "Main internal title for organizing this event inside Sanity.",
+        "Internal title for organizing this event inside Sanity.",
       type: "string",
-      initialValue: "",
       group: "basic",
-      validation: (Rule) => Rule.required(),
+
+      validation: (Rule) =>
+        Rule.required(),
+    }),
+
+    defineField({
+      name: "status",
+      title: "Event Status",
+      description:
+        "Published events appear on the website. Cancelled events stay saved in Sanity but are hidden from the website.",
+      type: "string",
+      initialValue: "published",
+
+      options: {
+        layout: "radio",
+
+        list: [
+          {
+            title: "Published",
+            value: "published",
+          },
+
+          {
+            title: "Cancelled",
+            value: "cancelled",
+          },
+        ],
+      },
+
+      validation: (Rule) =>
+        Rule.required(),
+
+      group: "basic",
     }),
 
     defineField({
       name: "displayTitle",
       title: "Display Title",
       description:
-        "Public visual title shown on cards and upcoming sections.",
+        "Public title shown on event cards and upcoming sections.",
       type: "string",
-      initialValue: "",
       group: "basic",
-      validation: (Rule) => Rule.required(),
+
+      validation: (Rule) =>
+        Rule.required(),
     }),
 
     defineField({
@@ -92,7 +125,6 @@ export const event = defineType({
       description:
         "Optional subtitle shown below the display title.",
       type: "string",
-      initialValue: "",
       group: "basic",
     }),
 
@@ -135,7 +167,9 @@ export const event = defineType({
             .replace(/--+/g, "-"),
       },
 
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) =>
+        Rule.required(),
+
       group: "basic",
     }),
 
@@ -148,11 +182,13 @@ export const event = defineType({
 
       options: {
         layout: "radio",
+
         list: [
           {
             title: "Single Day Ceremony",
             value: "single-day",
           },
+
           {
             title: "Retreat",
             value: "retreat",
@@ -160,7 +196,9 @@ export const event = defineType({
         ],
       },
 
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) =>
+        Rule.required(),
+
       group: "basic",
     }),
 
@@ -169,17 +207,15 @@ export const event = defineType({
       title: "Short Description",
       type: "text",
       rows: 3,
-      initialValue: "",
       group: "basic",
     }),
 
     defineField({
       name: "announcementNote",
-      title: "Short Announcement Note",
+      title: "Announcement",
       type: "text",
       rows: 2,
-      initialValue: "",
-      group: "detailView",
+      group: "basic",
     }),
 
     defineField({
@@ -193,7 +229,66 @@ export const event = defineType({
         },
       ],
 
-      group: "content",
+      group: "basic",
+    }),
+
+    defineField({
+      name: "showShortDescriptionOnCard",
+      title: "Show Short Description On Card",
+      type: "boolean",
+      initialValue: true,
+      group: "basic",
+    }),
+
+    defineField({
+      name: "showAnnouncementOnCard",
+      title: "Show Announcement On Card",
+      type: "boolean",
+      initialValue: true,
+      group: "basic",
+    }),
+
+    defineField({
+      name: "showLongDescriptionOnCard",
+      title: "Show Long Description On Card",
+      type: "boolean",
+      initialValue: false,
+      group: "basic",
+    }),
+
+    defineField({
+      name: "showReserveCtaOnCard",
+      title: "Show Reserve CTA On Card",
+      type: "boolean",
+      initialValue: true,
+      group: "basic",
+    }),
+
+    defineField({
+      name: "cardReserveCtaLabel",
+      title: "Card Reserve CTA Label",
+      type: "string",
+      initialValue: "Reserve",
+      group: "basic",
+    }),
+
+    defineField({
+      name: "cardImage",
+      title: "Card Image",
+      type: "image",
+
+      options: {
+        hotspot: true,
+      },
+
+      group: "basic",
+    }),
+
+    defineField({
+      name: "reservationUrl",
+      title: "Reservation URL",
+      type: "url",
+      group: "basic",
     }),
 
     defineField({
@@ -233,25 +328,87 @@ export const event = defineType({
       name: "timeRange",
       title: "Time Range",
       type: "string",
-      initialValue: "",
       group: "dates",
     }),
 
     defineField({
-      name: "cardImage",
-      title: "Card Image",
-      type: "image",
+      name: "useCardDateBadgeInDetail",
+      title: "Show Date Badge In Detail View",
+      type: "boolean",
+      initialValue: true,
+      group: "detailView",
+    }),
 
-      options: {
-        hotspot: true,
-      },
+    defineField({
+      name: "useCardImageInDetail",
+      title: "Show Card Image In Detail View",
+      type: "boolean",
+      initialValue: true,
+      group: "detailView",
+    }),
 
-      group: "media",
+    defineField({
+      name: "showShortDescriptionInDetail",
+      title: "Show Short Description In Detail View",
+      type: "boolean",
+      initialValue: true,
+      group: "detailView",
+    }),
+
+    defineField({
+      name: "showAnnouncementInDetail",
+      title: "Show Announcement In Detail View",
+      type: "boolean",
+      initialValue: true,
+      group: "detailView",
+    }),
+
+    defineField({
+      name: "showLongDescriptionInDetail",
+      title: "Show Long Description In Detail View",
+      type: "boolean",
+      initialValue: true,
+      group: "detailView",
+    }),
+
+    defineField({
+      name: "showCountdown",
+      title: "Show Countdown",
+      type: "boolean",
+      initialValue: false,
+      group: "detailView",
+    }),
+
+    defineField({
+      name: "showLocation",
+      title: "Show Location",
+      type: "boolean",
+      initialValue: false,
+      group: "detailView",
+    }),
+
+    defineField({
+      name: "showReserveCtaInDetail",
+      title: "Show Reserve CTA In Detail View",
+      type: "boolean",
+      initialValue: true,
+      group: "detailView",
+    }),
+
+    defineField({
+      name: "detailReserveCtaLabel",
+      title: "Detail Reserve CTA Label",
+      type: "string",
+
+      initialValue:
+        "Reserve Your Spot",
+
+      group: "detailView",
     }),
 
     defineField({
       name: "detailedViewImage",
-      title: "Detailed View Image",
+      title: "Detail Image",
       type: "image",
 
       options: {
@@ -263,7 +420,7 @@ export const event = defineType({
 
     defineField({
       name: "features",
-      title: "Features",
+      title: "Features / Included Items",
       type: "array",
 
       of: [
@@ -285,7 +442,6 @@ export const event = defineType({
               name: "text",
               title: "Text",
               type: "string",
-              initialValue: "",
 
               validation: (Rule) =>
                 Rule.required(),
@@ -342,23 +498,48 @@ export const event = defineType({
       name: "whatsappPhoneNumber",
       title: "WhatsApp Phone Number",
       type: "string",
-      initialValue: "",
       group: "detailView",
     }),
 
     defineField({
-      name: "reservationUrl",
-      title: "Reservation URL",
-      type: "url",
-      initialValue: "",
-      group: "basic",
+      name: "showShareCta",
+      title: "Show Share CTA",
+      type: "boolean",
+      initialValue: true,
+      group: "shareView",
+    }),
+
+    defineField({
+      name: "shareTitle",
+      title: "Share Title",
+      type: "string",
+      group: "shareView",
+    }),
+
+    defineField({
+      name: "shareDescription",
+      title: "Share Description",
+      type: "text",
+      rows: 2,
+      group: "shareView",
+    }),
+
+    defineField({
+      name: "sharePreviewImage",
+      title: "Share Preview Image",
+      type: "image",
+
+      options: {
+        hotspot: true,
+      },
+
+      group: "shareView",
     }),
 
     defineField({
       name: "seoTitle",
       title: "SEO Title",
       type: "string",
-      initialValue: "",
       group: "seo",
     }),
 
@@ -366,11 +547,7 @@ export const event = defineType({
       name: "seoDescription",
       title: "SEO Description",
       type: "text",
-
       rows: 3,
-
-      initialValue: "",
-
       group: "seo",
     }),
 
@@ -394,6 +571,7 @@ export const event = defineType({
       displaySubtitle: "displaySubtitle",
       media: "cardImage",
       eventType: "eventType",
+      status: "status",
       singleDate: "singleDate",
       startDate: "startDate",
     },
@@ -415,6 +593,11 @@ export const event = defineType({
           )
         : "No date";
 
+      const statusLabel =
+        selection.status === "cancelled"
+          ? "Cancelled"
+          : "Published";
+
       return {
         title:
           selection.displayTitle ||
@@ -422,6 +605,7 @@ export const event = defineType({
           "Untitled event",
 
         subtitle: [
+          statusLabel,
           selection.displaySubtitle,
           selection.eventType === "retreat"
             ? "Retreat"

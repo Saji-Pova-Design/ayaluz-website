@@ -169,7 +169,7 @@ export default function TestimonialsSection({ data }: TestimonialsSectionProps) 
   }, [currentIndex, testimonials.length])
 
   return (
-    <section className="w-full overflow-hidden bg-[#F6F1E8] py-10 md:py-24">
+    <section className="w-full overflow-hidden bg-[#F6F1E8] py-4 md:py-10">
       <div className="mx-auto max-w-[1440px] px-4 md:px-6 lg:px-10">
         <div className="mx-auto mb-12 max-w-[760px] text-center md:mb-18">
           {data?.eyebrow && (
@@ -276,22 +276,51 @@ export default function TestimonialsSection({ data }: TestimonialsSectionProps) 
           </div>
 
           {testimonials.length > 1 && (
-            <div className="mt-8 hidden items-center justify-center gap-3 md:flex">
-              {testimonials.map((testimonial, index) => (
-                <button
-                  key={testimonial._key || testimonial.id || index}
-                  type="button"
-                  onClick={() => setCurrentIndex(index)}
-                  aria-label={`Go to testimonial ${index + 1}`}
-                  className={`h-2.5 rounded-full transition-all duration-300 ${
-                    currentIndex === index
-                      ? 'w-8 bg-[#2B4A40]'
-                      : 'w-2.5 bg-[#2B4A40]/30'
-                  }`}
-                />
-              ))}
-            </div>
-          )}
+  <>
+    {/* DESKTOP */}
+    <div className="mt-8 hidden items-center justify-center gap-8 md:flex">
+      <div className="flex items-center gap-3">
+        {testimonials.map((testimonial, index) => (
+          <button
+            key={testimonial._key || testimonial.id || index}
+            type="button"
+            onClick={() => setCurrentIndex(index)}
+            className={`h-2.5 rounded-full transition-all duration-300 ${
+              currentIndex === index
+                ? 'w-8 bg-[#2B4A40]'
+                : 'w-2.5 bg-[#2B4A40]/30'
+            }`}
+          />
+        ))}
+      </div>
+
+      <Link
+        href={data?.ctaHref || '/testimonials'}
+        className="group inline-flex items-center gap-2 text-[16px] font-medium text-[#2B4A40]"
+      >
+        <span>
+          {data?.ctaLabel || 'Explore all testimonials'}
+        </span>
+
+        <span>→</span>
+      </Link>
+    </div>
+
+    {/* MOBILE */}
+    <div className="mt-4 flex justify-center md:hidden">
+      <Link
+        href={data?.ctaHref || '/testimonials'}
+        className="group inline-flex items-center gap-2 text-[15px] font-medium text-[#2B4A40]"
+      >
+        <span>
+          {data?.ctaLabel || 'Explore all testimonials'}
+        </span>
+
+        <span>→</span>
+      </Link>
+    </div>
+  </>
+)}
         </div>
 
         {(data?.ctaLabel || data?.ctaHref) && (

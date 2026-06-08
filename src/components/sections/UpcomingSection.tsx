@@ -1,10 +1,12 @@
 "use client";
 
+import EventDetailsModal from "@/components/sections/shared/EventDetailsModal";
 import {
   useEffect,
   useMemo,
   useState,
 } from "react";
+import EventDateBadge from "@/components/sections/shared/EventDateBadge";
 
 import Image from "next/image";
 import { PortableText } from "@portabletext/react";
@@ -139,24 +141,6 @@ function getEventDate(event?: EventItem | null) {
   return date;
 }
 
-function getDateParts(date?: string | null) {
-  if (!date) return null;
-
-  const parsedDate = new Date(date);
-
-  if (Number.isNaN(parsedDate.getTime())) return null;
-
-  return {
-    day: String(parsedDate.getDate()),
-    month: parsedDate.toLocaleDateString("en-US", {
-      month: "long",
-    }),
-    weekday: parsedDate.toLocaleDateString("en-US", {
-      weekday: "long",
-    }),
-    year: String(parsedDate.getFullYear()),
-  };
-}
 
 function getCountdownTarget(event?: EventItem | null) {
   if (!event) return null;
@@ -252,12 +236,12 @@ function useCountdown(event?: EventItem | null) {
 function WhatsAppIcon() {
   return (
     <svg
-      viewBox="0 0 32 32"
-      aria-hidden="true"
-      className="h-5 w-5"
+      viewBox="0 0 16 16"
       fill="currentColor"
+      className="h-6 w-6"
+      aria-hidden="true"
     >
-      <path d="M16.04 3.2A12.7 12.7 0 0 0 5.23 22.58L3.6 28.8l6.35-1.58A12.68 12.68 0 1 0 16.04 3.2Zm0 2.3a10.38 10.38 0 0 1 8.8 15.88 10.35 10.35 0 0 1-13.95 3.72l-.45-.25-3.77.94.96-3.67-.29-.47A10.39 10.39 0 0 1 16.04 5.5Zm-4.2 5.38c-.23 0-.6.08-.92.43-.32.35-1.22 1.2-1.22 2.93s1.25 3.4 1.43 3.64c.17.23 2.42 3.87 5.98 5.27 2.96 1.17 3.56.94 4.2.88.64-.06 2.06-.84 2.35-1.65.29-.82.29-1.52.2-1.66-.09-.15-.32-.24-.67-.42-.35-.17-2.06-1.02-2.38-1.13-.32-.12-.55-.18-.78.17-.23.35-.9 1.13-1.1 1.36-.2.23-.41.26-.76.09-.35-.18-1.48-.55-2.82-1.75-1.04-.93-1.74-2.08-1.94-2.43-.2-.35-.02-.54.15-.72.16-.16.35-.41.53-.61.17-.2.23-.35.35-.58.12-.23.06-.44-.03-.61-.09-.18-.78-1.89-1.07-2.59-.28-.67-.57-.58-.78-.59h-.68Z" />
+      <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93a7.898 7.898 0 0 0-2.327-5.607ZM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592Zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.589-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.65 0 .972.71 1.916.81 2.049.098.133 1.397 2.132 3.383 2.991.473.205.842.327 1.13.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232Z" />
     </svg>
   );
 }
@@ -285,28 +269,7 @@ function EventTitleLockup({
   );
 }
 
-function DetailTitleLockup({
-  event,
-}: {
-  event: EventItem;
-}) {
-  const title = getPublicEventTitle(event);
-  const subtitle = getPublicEventSubtitle(event);
 
-  return (
-    <div className="min-w-0 leading-none">
-      <h2 className="font-serif text-4xl leading-[0.95] tracking-[-0.06em] text-[#1B1713] md:text-6xl">
-        {title}
-      </h2>
-
-      {subtitle && (
-        <p className="mt-2 text-sm uppercase tracking-[0.28em] text-[#7A5F3C] md:text-base">
-          {subtitle}
-        </p>
-      )}
-    </div>
-  );
-}
 
 function CountdownBlocks({
   countdown,
@@ -362,293 +325,8 @@ function CountdownBlocks({
   );
 }
 
-function SingleDayDateBadge({
-  date,
-}: {
-  date?: string | null;
-}) {
-  const dateParts = getDateParts(date);
 
-  if (!dateParts) return null;
 
-  return (
-    <div className="flex items-center gap-5 p-0">
-      <div className="flex h-12 w-12 items-center justify-center rounded-[10px] border border-[#28543B] md:h-16 md:w-16 md:rounded-[16px]">
-        <span className="text-2xl font-bold tracking-[-0.05em] md:text-3xl">
-          {dateParts.day}
-        </span>
-      </div>
-
-      <div>
-        <div className="text-lg font-semibold tracking-[-0.05em] md:text-2xl">
-          {dateParts.month}
-        </div>
-
-        <div className="mt-0 text-base md:text-lg">
-          {dateParts.weekday}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function RetreatDateBadge({
-  startDate,
-  endDate,
-}: {
-  startDate?: string | null;
-  endDate?: string | null;
-}) {
-  const start = getDateParts(startDate);
-  const end = getDateParts(endDate);
-
-  if (!start || !end) return null;
-
-  return (
-    <div className="flex items-start gap-4 p-0 md:gap-5">
-      {[start, end].map((date, index) => (
-        <div
-          key={`${date.day}-${date.month}-${date.year}`}
-          className="flex items-center gap-4 md:gap-5"
-        >
-          {index === 1 && (
-            <div className="h-px w-5 bg-[#28543B] md:w-8" />
-          )}
-
-          <div className="flex items-center gap-3 md:gap-4">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[10px] border border-[#28543B] md:h-16 md:w-16 md:rounded-[16px]">
-              <span className="text-lg font-semibold tracking-[-0.05em] md:text-2xl">
-                {date.day}
-              </span>
-            </div>
-
-            <div className="leading-none">
-              <div className="text-lg font-bold tracking-[-0.05em] md:text-2xl">
-                {date.month}
-              </div>
-
-              <div className="mt-1 text-[10px] uppercase tracking-[0.22em] text-[#7A5F3C] md:text-xs">
-                {date.year}
-              </div>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function EventDateBadge({
-  event,
-}: {
-  event?: EventItem | null;
-}) {
-  if (!event) return null;
-
-  if (event.eventType === "retreat") {
-    return (
-      <RetreatDateBadge
-        startDate={event.startDate}
-        endDate={event.endDate}
-      />
-    );
-  }
-
-  return (
-    <SingleDayDateBadge
-      date={event.singleDate}
-    />
-  );
-}
-
-function FeatureItemCard({
-  feature,
-}: {
-  feature: FeatureItem;
-}) {
-  const iconUrl = getImageUrl(feature.icon, 76, 76);
-
-  return (
-    <div className="flex items-start gap-4 rounded-[24px] border border-[#2B4A40]/10 bg-[#FFFAF1] p-5">
-      {iconUrl && (
-        <Image
-          src={iconUrl}
-          alt=""
-          width={38}
-          height={38}
-          className="shrink-0"
-        />
-      )}
-
-      <p className="text-sm leading-[1.7] text-[#1A1A1A]">
-        {feature.text}
-      </p>
-    </div>
-  );
-}
-
-function LocationCard() {
-  return (
-    <div className="rounded-[24px] border border-[#2B4A40]/10 bg-[#FFFAF1] px-5 py-5 shadow-[0_18px_70px_-58px_rgba(20,25,22,0.28)] md:w-fit md:px-6 md:py-5">
-      <p className="text-[10px] uppercase tracking-[0.28em] text-[#7A5F3C] md:text-xs">
-        Location
-      </p>
-
-      <p className="mt-1 text-base font-semibold tracking-[-0.03em] text-[#1A1A1A] md:text-lg">
-        {AYALUZ_LOCATION.name}
-      </p>
-
-      <a
-        href={AYALUZ_LOCATION.googleMapsUrl}
-        target="_blank"
-        rel="noreferrer"
-        className="mt-4 inline-flex h-9 w-fit items-center justify-center rounded-[12px] border border-[#0B63CE]/35 px-3 text-sm font-semibold tracking-[-0.03em] text-[#0B63CE]"
-      >
-        Open Maps ↗
-      </a>
-    </div>
-  );
-}
-
-function EventDetailModal({
-  event,
-  onClose,
-}: {
-  event: EventItem;
-  onClose: () => void;
-}) {
-  useEffect(() => {
-    function handleEscape(keyboardEvent: KeyboardEvent) {
-      if (keyboardEvent.key === "Escape") onClose();
-    }
-
-    window.addEventListener("keydown", handleEscape);
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      window.removeEventListener("keydown", handleEscape);
-      document.body.style.overflow = "";
-    };
-  }, [onClose]);
-
-  const detailImageUrl =
-    getImageUrl(event.detailedViewImage, 1800, 720) ||
-    getImageUrl(event.cardImage, 1400, 720);
-
-  const countdown = useCountdown(event);
-
-  return (
-    <div
-      className="fixed inset-0 z-[999] flex items-end justify-center bg-black/50 backdrop-blur-md lg:items-center"
-      onClick={onClose}
-    >
-      <div
-        className="relative max-h-[92vh] w-full overflow-y-auto rounded-t-[34px] bg-[#F5EFE4] shadow-2xl lg:w-[1120px] lg:rounded-[38px]"
-        onClick={(clickEvent) => clickEvent.stopPropagation()}
-      >
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute right-5 top-5 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-black/40 text-xl text-white backdrop-blur-sm"
-        >
-          ✕
-        </button>
-
-        {detailImageUrl && (
-          <div className="relative h-[260px] overflow-hidden rounded-t-[34px] bg-[#DDD4C5] md:h-[420px] lg:h-[460px] lg:rounded-t-[38px]">
-            <Image
-              src={detailImageUrl}
-              alt={getPublicEventTitle(event)}
-              fill
-              unoptimized
-              priority
-              sizes="(max-width: 1024px) 100vw, 1120px"
-              className="object-cover"
-            />
-          </div>
-        )}
-
-        <div className="p-5 md:p-10">
-          <div className="flex flex-col gap-7 md:gap-8">
-            <div className="flex flex-col gap-4 rounded-[28px] border border-[#2B4A40]/8 bg-[#FFFAF1]/92 p-5 md:flex-row md:flex-wrap md:items-center md:gap-5 md:p-6">
-              <EventDateBadge event={event} />
-
-              <div className="flex flex-wrap items-center gap-3 md:ml-auto">
-                {event.timeRange && (
-                  <div className="rounded-full border border-[#2B4A40]/10 bg-[#F6F1E8] px-4 py-2.5 text-xs font-medium text-[#2B4A40] md:px-5 md:py-3 md:text-sm">
-                    {event.timeRange}
-                  </div>
-                )}
-
-                <CountdownBlocks countdown={countdown} />
-              </div>
-            </div>
-
-            <DetailTitleLockup event={event} />
-
-            {event.announcementNote && (
-              <div className="rounded-[24px] border border-[#D7C1A1] bg-[#FFF7EA] px-5 py-4 text-sm text-[#7A5F3C]">
-                {event.announcementNote}
-              </div>
-            )}
-
-            {event.longDescription && (
-              <div className="prose prose-neutral max-w-none prose-p:text-[#1A1A1A] prose-p:leading-[1.9]">
-                <PortableText value={event.longDescription} />
-              </div>
-            )}
-
-            {event.features && event.features.length > 0 && (
-              <div>
-                <h3 className="mb-6 font-serif text-3xl">
-                  Included
-                </h3>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  {event.features.map((feature, index) => (
-                    <FeatureItemCard
-                      key={`${feature.text || "feature"}-${index}`}
-                      feature={feature}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <LocationCard />
-
-            <div className="rounded-[30px] bg-[#D8E8DC] p-7 text-[#111111] md:p-8">
-              <h3 className="text-3xl font-bold tracking-[-0.04em] md:text-5xl">
-                {event.whatsappTitle ||
-                  "Have questions or need guidance?"}
-              </h3>
-
-              <p className="mt-5 max-w-[680px] text-xl tracking-[-0.03em] text-[#111111]/80 md:text-3xl">
-                {event.whatsappDescription ||
-                  "Click and connect with us on WhatsApp"}
-              </p>
-
-              {event.whatsappPhoneNumber && (
-                <a
-                  href={`https://wa.me/${event.whatsappPhoneNumber.replace(
-                    /\D/g,
-                    "",
-                  )}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-8 inline-flex h-14 items-center justify-center gap-3 rounded-full border border-white/70 bg-white/70 px-8 text-lg font-semibold text-[#46A35A]"
-                >
-                  <WhatsAppIcon />
-                  {event.whatsappButtonLabel || "Connect"}
-                </a>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function UpcomingCard({
   item,
@@ -824,7 +502,7 @@ export default function UpcomingSection({
   return (
     <>
       <section className="bg-[#F5EFE4] px-5 py-8 text-[#1F1A14] md:px-10 md:py-12 lg:px-16">
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-6xl">
           <div className="space-y-8">
             {items.map((item, index) => (
               <UpcomingCard
@@ -838,11 +516,12 @@ export default function UpcomingSection({
       </section>
 
       {activeEvent && (
-        <EventDetailModal
-          event={activeEvent}
-          onClose={() => setActiveEvent(null)}
-        />
-      )}
+  <EventDetailsModal
+  open={true}
+  event={activeEvent}
+  onClose={() => setActiveEvent(null)}
+/>
+)}
     </>
   );
 }

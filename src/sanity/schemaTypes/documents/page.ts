@@ -55,33 +55,19 @@ export const page = defineType({
       type: "array",
 
       of: [
-        {
-          type: "promoBannerSection",
-        },
+        { type: "promoBannerSection" },
+        {type: "navbarSection"},
+        { type: "heroSection" },
+        { type: "calendarSection" },
+        { type: "upcomingSection" },
+        { type: "faqSection" },
+        { type: "testimonialSection" },
+        { type: "richTextSection" },
 
-        {
-          type: "heroSection",
-        },
-
-        {
-          type: "calendarSection",
-        },
-
-        {
-          type: "upcomingSection",
-        },
-
-        {
-          type: "faqSection",
-        },
-
-        {
-          type: "testimonialSection",
-        },
-
-        {
-          type: "richTextSection",
-        },
+        { type: "contentImageTopSection" },
+        { type: "contentImageLeftSection" },
+        { type: "contentImageRightSection" },
+        { type: "zigzagContentSection" },
       ],
     }),
   ],
