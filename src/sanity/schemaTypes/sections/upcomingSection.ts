@@ -146,8 +146,6 @@ export const upcomingSection = defineType({
               eventDisplayTitle: "event.displayTitle",
               eventDisplaySubtitle:
                 "event.displaySubtitle",
-              eventDisplayIcon: "event.displayIcon",
-              eventIcon: "event.eventIcon",
               badgeLabel: "badgeLabel",
               backgroundImage: "backgroundImage",
             },
@@ -170,8 +168,6 @@ export const upcomingSection = defineType({
                 title,
                 subtitle: subtitleParts.join(" • "),
                 media:
-                  selection.eventDisplayIcon ||
-                  selection.eventIcon ||
                   selection.backgroundImage,
               };
             },

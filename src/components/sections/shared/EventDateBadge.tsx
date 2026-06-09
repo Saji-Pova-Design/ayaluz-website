@@ -41,7 +41,7 @@ function SingleDayDateBadge({
   if (!dateParts) return null;
 
   return (
-    <div className="flex items-center gap-5 p-0">
+    <div className="flex items-center gap-2 md:gap-5 p-0">
       <div className="flex h-12 w-12 items-center justify-center rounded-[10px] border border-[#28543B] md:h-16 md:w-16 md:rounded-[16px]">
         <span className="text-2xl font-bold tracking-[-0.05em] md:text-3xl">
           {dateParts.day}
@@ -74,17 +74,17 @@ function RetreatDateBadge({
   if (!start || !end) return null;
 
   return (
-    <div className="flex items-start gap-4 p-0 md:gap-5">
+    <div className="flex items-start gap-1 p-0 md:gap-5">
       {[start, end].map((date, index) => (
         <div
           key={`${date.day}-${date.month}-${date.year}`}
-          className="flex items-center gap-4 md:gap-5"
+          className="flex items-center gap-1 md:gap-5"
         >
           {index === 1 && (
             <div className="h-px w-5 bg-[#28543B] md:w-8" />
           )}
 
-          <div className="flex items-center gap-3 md:gap-4">
+          <div className="flex items-center gap-2 md:gap-5">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[10px] border border-[#28543B] md:h-16 md:w-16 md:rounded-[16px]">
               <span className="text-2xl font-bold tracking-[-0.05em] md:text-3xl">
                 {date.day}

@@ -105,6 +105,16 @@ export const siteSettingsQuery = groq`
   }
 `;
 
+export const eventBySlugQuery = groq`
+  *[
+    _type == "event" &&
+    slug.current == $slug &&
+    coalesce(status, "published") == "published"
+  ][0] {
+    ${eventFields}
+  }
+`;
+
 export const pageBySlugQuery = groq`
   *[slug.current == $slug][0] {
     _id,
@@ -134,14 +144,13 @@ export const pageBySlugQuery = groq`
         button
       },
 
-
       _type == "navbarSection" => {
-  _type,
-  _key,
-  brandName,
-  logo,
-  items
-},
+        _type,
+        _key,
+        brandName,
+        logo,
+        items
+      },
 
       _type == "contentImageTopSection" => {
         ${contentSectionFields}

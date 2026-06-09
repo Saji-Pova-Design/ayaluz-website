@@ -8,7 +8,7 @@ import EventDetailsModal from "@/components/sections/shared/EventDetailsModal";
 import Image from "next/image";
 import { PortableText } from "@portabletext/react";
 import EventDateBadge from "../shared/EventDateBadge";
-
+import CalendarEventCard from "./CalendarEventCard";
 import { urlFor } from "@/sanity/lib/image";
 
 type SanityImage = {
@@ -38,7 +38,6 @@ type EventItem = {
   title?: string;
   displayTitle?: string;
   displaySubtitle?: string;
-  displayIcon?: SanityImage | null;
   slug?: string;
   eventType?: "single-day" | "retreat";
 
@@ -267,83 +266,10 @@ function EventIdentity({
   );
 }
 
-function EventCard({
-  event,
-  onOpen,
-}: {
-  event: EventItem;
-  onOpen: () => void;
-}) {
-  return (
-    <article className="overflow-hidden rounded-[36px] border border-[#2B4A40]/10 bg-[#FFFAF1] shadow-[0_20px_80px_-42px_rgba(20,25,22,0.35)]">
-      <div className="grid lg:grid-cols-[44%_1fr]">
-        <EventCardImage event={event} />
-
-        <div className="flex flex-col justify-center gap-4 p-4 md:p-10 lg:gap-4 lg:p-8">
-          <EventIdentity event={event} />
-
-          <EventDateBadge event={event} />
-
-          {event.showAnnouncementOnCard !== false &&
-            event.announcementNote && (
-              <div className="rounded-[18px] border border-[#D7C1A1] bg-[#FFF7EA] px-4 py-3 text-sm leading-[1.6] text-[#7A5F3C]">
-                {event.announcementNote}
-              </div>
-            )}
-
-          {event.showShortDescriptionOnCard !== false &&
-            event.shortDescription && (
-              <p className="max-w-[640px] text-base leading-[1.75] text-[#1A1A1A] md:text-lg">
-                {event.shortDescription}
-              </p>
-            )}
-
-          {event.showLongDescriptionOnCard &&
-            event.longDescription && (
-              <div className="prose prose-neutral max-w-none prose-p:leading-[1.75] prose-p:text-[#1A1A1A]">
-                <PortableText value={event.longDescription} />
-              </div>
-            )}
-
-          <div className="flex flex-row gap-3">
-          {event.showReserveCtaOnCard !== false && (
-  <a
-    href={event.reservationUrl || "#"}
-    target="_blank"
-    rel="noreferrer"
-    className="inline-flex h-12 flex-1 items-center justify-center rounded-full bg-[#2B4A40] px-7 text-sm font-medium text-[#FFFAF1] transition-all duration-300 hover:bg-[#1F3E35]"
-  >
-    <span className="sm:hidden">
-      {event.cardReserveCtaLabel || "Reserve"}
-    </span>
-    <span className="hidden sm:inline">
-      {event.cardReserveCtaLabel ||
-        "Reserve Your Spot"}
-    </span>
-  </a>
-)}
-
-            <button
-              type="button"
-              onClick={onOpen}
-              className="inline-flex h-12 flex-1 items-center justify-center rounded-full border border-[#2B4A40] px-7 text-sm font-medium text-[#2B4A40] transition-all duration-300 hover:bg-[#2B4A40] hover:text-[#FFFAF1]"
-            >
-              <span className="sm:hidden">Details</span>
-              <span className="hidden sm:inline">
-                View Details
-              </span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </article>
-  );
-}
-
 function EmptyMonthState() {
   return (
     <div className="overflow-hidden rounded-[34px] border border-[#2B4A40]/10 bg-[#FFFAF1] shadow-[0_18px_60px_-32px_rgba(20,25,22,0.18)]">
-      <div className="relative h-[280px] md:min-h-[420px] md:h-auto overflow-hidden">
+      <div className="relative h-[280px] overflow-hidden md:h-auto md:min-h-[420px]">
         <Image
           src="/images/no-event.png"
           alt="No events yet"
@@ -355,25 +281,24 @@ function EmptyMonthState() {
         <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/25 to-transparent" />
 
         <div className="absolute inset-0 flex items-center p-8 md:p-12 lg:p-14">
-        <div>
-  <p className="max-w-[520px] font-serif text-3xl leading-[0.95] tracking-[-0.06em] text-[#F5EFE4] md:text-3xl lg:text-5xl">
-    No events
-    <br />
-    have been opened
-    <br />
-    for this month yet.
-  </p>
+          <div>
+            <p className="max-w-[520px] font-serif text-3xl leading-[0.95] tracking-[-0.06em] text-[#F5EFE4] md:text-3xl lg:text-5xl">
+              No events
+              <br />
+              have been opened
+              <br />
+              for this month yet.
+            </p>
 
-  <p className="mt-8 max-w-[420px] text-sm leading-[1.8] tracking-[-0.02em] text-[#C99A5D] md:3xl lg:text-2xl ">
-    New ceremonies and retreats are being lovingly planned.
-  </p>
-</div>
+            <p className="mt-8 max-w-[420px] text-sm leading-[1.8] tracking-[-0.02em] text-[#C99A5D] md:3xl lg:text-2xl">
+              New ceremonies and retreats are being lovingly planned.
+            </p>
+          </div>
         </div>
       </div>
     </div>
   );
 }
-
 
 function CalendarExpandButton({
   label,
@@ -463,71 +388,72 @@ export default function CalendarSection({
 
   return (
     <>
-      <section className="bg-[#F5EFE4] px-6 py-6 text-[#1F1A14] md:px-10 md:py-8 lg:px-16">
+      <section className="bg-[#F5EFE4] px-6 py-6 text-[#1F1A14] md:px-30 md:py-8 lg:px-30">
         <div className="mx-auto max-w-6xl">
-          <div className="mb-6 max-w-3xl">
-            {data.eyebrow && (
-              <p className="mb-4 text-xs uppercase tracking-[0.32em] text-[#7A5F3C]">
-                {data.eyebrow}
-              </p>
-            )}
+        <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-end lg:gap-5">
+            <div className="max-w-3xl">
+              {data.eyebrow && (
+                <p className="mb-4 text-xs lg:text-lg uppercase tracking-[0.32em] text-[#7A5F3C]">
+                  {data.eyebrow}
+                </p>
+              )}
 
-            {data.title && (
-              <h2 className="font-serif text-4xl tracking-[-0.05em] md:text-6xl">
-                {data.title}
-              </h2>
-            )}
+              {data.title && (
+                <h2 className="font-serif text-4xl tracking-[-0.05em] md:text-6xl">
+                  {data.title}
+                </h2>
+              )}
 
-            {data.description && (
-              <p className="mt-6 text-lg leading-[1.8] text-[#5F5548]">
-                {data.description}
-              </p>
-            )}
-          </div>
-
-          <div className="mb-2 flex w-fit items-center gap-4 rounded-full border border-[#2B4A40]/10 bg-[#FFFAF1] px-3 py-2 md:mb-4 md:gap-6 md:px-5 md:py-4">
-            <button
-              type="button"
-              onClick={() => {
-                if (!disablePrevious) {
-                  handlePreviousMonth();
-                }
-              }}
-              aria-disabled={disablePrevious}
-              className={`flex h-10 w-10 items-center justify-center rounded-full border border-[#2B4A40]/10 transition-all duration-300 ${
-                disablePrevious
-                  ? "cursor-not-allowed opacity-25"
-                  : "hover:bg-[#2B4A40] hover:text-[#FFFAF1]"
-              }`}
-            >
-              ←
-            </button>
-
-            <div className="text-center">
-              <h3 className="font-serif text-2xl tracking-[-0.05em] md:text-3xl">
-                {getMonthLabel(selectedMonth)}
-              </h3>
-
-              <p className="text-[#7A5F3C]">
-                {selectedMonth.year}
-              </p>
+              {data.description && (
+                <p className="mt-6 text-lg leading-[1.8] text-[#5F5548]">
+                  {data.description}
+                </p>
+              )}
             </div>
 
-            <button
-              type="button"
-              onClick={handleNextMonth}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-[#2B4A40]/10 transition-all duration-300 hover:bg-[#2B4A40] hover:text-[#FFFAF1]"
-            >
-              →
-            </button>
+            <div className="flex w-fit items-center gap-4 rounded-full border border-[#2B4A40]/10 bg-[#FFFAF1] px-3 py-1 md:gap-6 md:px-5 md:py-1">
+              <button
+                type="button"
+                onClick={() => {
+                  if (!disablePrevious) {
+                    handlePreviousMonth();
+                  }
+                }}
+                aria-disabled={disablePrevious}
+                className={`flex h-10 w-10 items-center justify-center rounded-full border border-[#2B4A40]/10 transition-all duration-300 ${
+                  disablePrevious
+                    ? "cursor-not-allowed opacity-25"
+                    : "hover:bg-[#2B4A40] hover:text-[#FFFAF1]"
+                }`}
+              >
+                ←
+              </button>
+
+              <div className="text-center">
+                <h3 className="font-serif text-2xl tracking-[-0.05em] md:text-3xl">
+                  {getMonthLabel(selectedMonth)}
+                </h3>
+
+                <p className="text-[#7A5F3C]">
+                  {selectedMonth.year}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleNextMonth}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-[#2B4A40]/10 transition-all duration-300 hover:bg-[#2B4A40] hover:text-[#FFFAF1]"
+              >
+                →
+              </button>
+            </div>
           </div>
 
           <div className="space-y-8">
             {selectedEvents.map((event) => (
-              <EventCard
+              <CalendarEventCard
                 key={event._id}
                 event={event}
-                onOpen={() => setActiveEvent(event)}
               />
             ))}
 
@@ -550,15 +476,14 @@ export default function CalendarSection({
 
                   <div className="space-y-8">
                     {monthEvents.map((event) => (
-                      <EventCard
+                      <CalendarEventCard
                         key={event._id}
                         event={event}
-                        onOpen={() => setActiveEvent(event)}
                       />
                     ))}
 
                     {monthEvents.length === 0 && (
-                    <EmptyMonthState />
+                      <EmptyMonthState />
                     )}
                   </div>
                 </div>

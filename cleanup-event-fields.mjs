@@ -11,7 +11,6 @@ const client = createClient({
 const eventId = "421ca061-81ad-4e9c-85b3-1cd683f2509b";
 
 const oldFields = [
-  "displayIcon",
   "useCardSubtitleInDetail",
   "useCardTitleInDetail",
   "useShortDescriptionInDetail",

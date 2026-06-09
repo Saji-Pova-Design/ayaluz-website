@@ -331,57 +331,58 @@ function FacebookIcon() {
 
 function SectionDivider() {
   return (
-    <div className="my-8 h-px w-full bg-gradient-to-r from-transparent via-[#D7C7B3] to-transparent" />
+    <div className="my-4 md:my-8 h-px w-full bg-gradient-to-r from-transparent via-[#D7C7B3] to-transparent" />
   );
 }
 
 function FeatureSection({
-  title,
-  items,
-}: {
-  title: string;
-  items?: FeatureItem[];
-}) {
-  if (!items || items.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="mt-9">
-      <h3 className="mb-5 font-canela text-[2rem] leading-none tracking-[-0.04em] text-[#111111]">
-        {title}
-      </h3>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        {items.map((item, index) => {
-          const iconUrl = getImageUrl(item.icon, 80, 80);
-
-          return (
-            <div
-              key={`${item.text || "feature"}-${index}`}
-              className="flex items-start gap-4 rounded-[24px] border border-[#E4D7C7] bg-[#FFFAF1] p-5"
-            >
-              {iconUrl && (
-                <Image
-                  src={iconUrl}
-                  alt=""
-                  width={42}
-                  height={42}
-                  unoptimized
-                  className="shrink-0"
-                />
-              )}
-
-              <p className="text-[0.98rem] leading-[1.75] text-[#1C1C1C]">
-                {item.text}
-              </p>
-            </div>
-          );
-        })}
+    title,
+    items,
+  }: {
+    title: string;
+    items?: FeatureItem[];
+  }) {
+    if (!items || items.length === 0) {
+      return null;
+    }
+  
+    return (
+      <div className="mt-9">
+        <h3 className="mb-5 font-canela text-[2rem] leading-none tracking-[-0.04em] text-[#111111]">
+          {title}
+        </h3>
+  
+        <div className="grid gap-4 md:grid-cols-2">
+          {items.map((item, index) => {
+            const iconUrl = getImageUrl(item.icon, 80, 80);
+  
+            return (
+              <div
+                key={`${item.text || "feature"}-${index}`}
+                className="flex items-start gap-4 rounded-[24px] border border-[#E4D7C7] bg-[#FFFAF1] p-5"
+              >
+                {iconUrl && (
+                  <div className="relative h-11 w-11 shrink-0 overflow-hidden">
+                    <Image
+                      src={iconUrl}
+                      alt=""
+                      fill
+                      unoptimized
+                      className="object-contain"
+                    />
+                  </div>
+                )}
+  
+                <p className="text-[0.98rem] leading-[1.75] text-[#1C1C1C]">
+                  {item.text}
+                </p>
+              </div>
+            );
+          })}
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
 function ShareView({
   event,
@@ -672,7 +673,7 @@ export default function EventDetailsModal({
               <div className="px-6 pb-10 pt-7 md:px-12 md:pb-12 md:pt-10">
                 <div className="flex flex-col gap-7 md:flex-row md:items-start md:justify-between">
                   <div className="min-w-0 flex-1">
-                    <h2 className="font-canela text-[3rem] leading-[0.9] tracking-[-0.06em] text-[#111111] md:text-[4.8rem]">
+                    <h2 className="font-canela text-3xl font-medium leading-[0.9] tracking-[-0.06em] text-[#111111] md:text-6xl">
                       {data.title}
                     </h2>
 
@@ -703,7 +704,7 @@ export default function EventDetailsModal({
                         rel={
                           event.reservationUrl ? "noreferrer" : undefined
                         }
-                        className="inline-flex h-[58px] items-center justify-center rounded-full bg-[#215848] px-5 text-[1.05rem] font-semibold text-[#FFFAF1]"
+                        className="inline-flex h-[48px] items-center justify-center rounded-full bg-[#215848] px-5 text-[1.05rem] font-semibold text-[#FFFAF1]"
                       >
                         {event.detailReserveCtaLabel ||
                           "Reserve Your Spot"}
@@ -714,7 +715,7 @@ export default function EventDetailsModal({
                       <button
                         type="button"
                         onClick={() => setShareView(true)}
-                        className="inline-flex h-[58px] items-center justify-center gap-2 rounded-full border border-[#215848] px-4 text-[1.02rem] font-semibold text-[#215848]"
+                        className="inline-flex h-[48px] items-center justify-center gap-2 rounded-full border border-[#215848] px-4 text-[1.02rem] font-semibold text-[#215848]"
                       >
                         Share
                         <ShareArrowIcon />
@@ -723,13 +724,13 @@ export default function EventDetailsModal({
                   </div>
                 </div>
 
-                <div className="mt-7 flex flex-col gap-3 md:flex-row md:items-stretch">
+                <div className="mt-3 md:mt-7 flex flex-col gap-6 md:gap-3 md:flex-row md:items-stretch">
                   <div className="flex flex-col gap-3 md:contents">
                     {event.useCardDateBadgeInDetail !== false && (
                       <div className="shrink-0">
-                        <div className="rounded-[28px] border border-[#E5D8C8] bg-[#F4EFE7] p-4">
+                        
                           <EventDateBadge event={event} />
-                        </div>
+                    
                       </div>
                     )}
 
@@ -743,7 +744,7 @@ export default function EventDetailsModal({
                           rel={
                             event.reservationUrl ? "noreferrer" : undefined
                           }
-                          className="inline-flex h-[58px] flex-1 items-center justify-center rounded-full bg-[#215848] px-5 text-[1.05rem] font-semibold text-[#FFFAF1]"
+                          className="inline-flex h-[48px] flex-1 items-center justify-center rounded-full bg-[#215848] px-5 text-[1.05rem] font-semibold text-[#FFFAF1]"
                         >
                           {event.detailReserveCtaLabel ||
                             "Reserve Your Spot"}
@@ -754,7 +755,7 @@ export default function EventDetailsModal({
                         <button
                           type="button"
                           onClick={() => setShareView(true)}
-                          className="inline-flex h-[58px] items-center justify-center gap-2 rounded-full border border-[#215848] px-4 text-[1.02rem] font-semibold text-[#215848]"
+                          className="inline-flex h-[48px] items-center justify-center gap-2 rounded-full border border-[#215848] px-4 text-[1.02rem] font-semibold text-[#215848]"
                         >
                           Share
                           <ShareArrowIcon />
@@ -765,7 +766,7 @@ export default function EventDetailsModal({
 
                   {event.showAnnouncementInDetail !== false &&
                     event.announcementNote && (
-                      <div className="flex min-h-full flex-1 items-center rounded-[28px] border border-[#E6C89E] bg-[#F7F0E6] px-6 py-5 md:ml-2">
+                      <div className="flex min-h-full flex-1 items-center rounded-[16px] border border-[#E6C89E] bg-[#F7F0E6] px-6 py-3 md-py-5 md:ml-2">
                         <p className="text-[1rem] leading-[1.55] text-[#8D643D]">
                           {event.announcementNote}
                         </p>
