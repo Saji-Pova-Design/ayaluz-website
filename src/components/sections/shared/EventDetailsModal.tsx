@@ -409,7 +409,7 @@ function ShareView({
       : "";
 
   const encodedUrl = encodeURIComponent(shareUrl);
-  const encodedText = encodeURIComponent(title);
+  const encodedText = "";
 
   const eventDate = getEventDateLabel(event);
 
@@ -499,7 +499,7 @@ function ShareView({
             </button>
 
             <a
-              href={`https://wa.me/?text=${encodedText}%20${encodedUrl}`}
+              href={`https://wa.me/?text=${encodedUrl}`}
               target="_blank"
               rel="noreferrer"
               className="inline-flex h-16 items-center justify-start gap-4 rounded-[14px] border border-[#E4D7C7] bg-[#F4EFE7] px-5 text-left text-lg font-medium text-[#111111] transition-all duration-300 hover:border-[#215848]/30 hover:bg-[#FFFAF1]"

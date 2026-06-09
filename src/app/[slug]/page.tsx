@@ -39,52 +39,83 @@ type EventPageData = {
 const SITE_URL = "https://www.ayaluz.org";
 
 function getOrdinalSuffix(day: number) {
-  if (day >= 11 && day <= 13) {
-    return "th";
-  }
+  if (day >= 11 && day <= 13) return "th";
 
   const lastDigit = day % 10;
 
-  if (lastDigit === 1) {
-    return "st";
-  }
-
-  if (lastDigit === 2) {
-    return "nd";
-  }
-
-  if (lastDigit === 3) {
-    return "rd";
-  }
+  if (lastDigit === 1) return "st";
+  if (lastDigit === 2) return "nd";
+  if (lastDigit === 3) return "rd";
 
   return "th";
 }
 
-function formatSingleDate(date?: string) {
-  if (!date) {
-    return "";
-  }
+function parseSafeDate(date?: string) {
+  if (!date) return null;
 
   const parsedDate = new Date(`${date}T12:00:00`);
+
+  if (Number.isNaN(parsedDate.getTime())) return null;
+
+  return parsedDate;
+}
+
+function getDateFromSlug(slug?: string) {
+  if (!slug) return "";
+
+  const match = slug
+    .toLowerCase()
+    .match(/(20\d{2})-(january|february|march|april|may|june|july|august|september|october|november|december)-(\d{1,2})/);
+
+  if (!match) return "";
+
+  const [, year, monthName, day] = match;
+
+  const monthMap: Record<string, string> = {
+    january: "01",
+    february: "02",
+    march: "03",
+    april: "04",
+    may: "05",
+    june: "06",
+    july: "07",
+    august: "08",
+    september: "09",
+    october: "10",
+    november: "11",
+    december: "12",
+  };
+
+  return `${year}-${monthMap[monthName]}-${day.padStart(2, "0")}`;
+}
+
+function formatSingleDate(date?: string) {
+  const parsedDate = parseSafeDate(date);
+
+  if (!parsedDate) return "";
+
   const month = parsedDate.toLocaleDateString("en-US", {
     month: "long",
   });
+
   const day = parsedDate.getDate();
 
   return `${month} ${day}${getOrdinalSuffix(day)}`;
 }
 
 function formatRetreatDateRange(startDate?: string, endDate?: string) {
-  if (!startDate || !endDate) {
-    return "";
-  }
+  const start = parseSafeDate(startDate);
+  const end = parseSafeDate(endDate);
 
-  const start = new Date(`${startDate}T12:00:00`);
-  const end = new Date(`${endDate}T12:00:00`);
+  if (!start && !end) return "";
+  if (start && !end) return formatSingleDate(startDate);
+  if (!start && end) return formatSingleDate(endDate);
+  if (!start || !end) return "";
 
   const startMonth = start.toLocaleDateString("en-US", {
     month: "long",
   });
+
   const endMonth = end.toLocaleDateString("en-US", {
     month: "long",
   });
@@ -99,14 +130,44 @@ function formatRetreatDateRange(startDate?: string, endDate?: string) {
   return `${startMonth} ${startDay}${getOrdinalSuffix(startDay)} – ${endMonth} ${endDay}${getOrdinalSuffix(endDay)}`;
 }
 
-function getCeremonyTitle(event: EventPageData) {
-  const source = `${event.displayTitle || ""} ${event.title || ""}`.toLowerCase();
+function getCeremonyDate(event: EventPageData) {
+  return getDateFromSlug(event.slug);
+}
 
-  if (source.includes("wachuma") || source.includes("san pedro")) {
-    return "Wachuma Ceremony";
-  }
+function getEventSourceText(event: EventPageData) {
+  return `${event.displayTitle || ""} ${event.displaySubtitle || ""} ${event.title || ""}`.toLowerCase();
+}
+
+function isWachumaEvent(event: EventPageData) {
+  const source = getEventSourceText(event);
+
+  return source.includes("wachuma") || source.includes("san pedro");
+}
+
+function isAyahuascaEvent(event: EventPageData) {
+  return getEventSourceText(event).includes("ayahuasca");
+}
+
+function getCeremonyTitle(event: EventPageData) {
+  if (isWachumaEvent(event)) return "Wachuma Ceremony";
 
   return "Ayahuasca Ceremony";
+}
+
+function getSocialDescription(event: EventPageData) {
+  if (event.eventType === "retreat") {
+    return "Transformative Sacred Plant Medicine Journeys in Peru's Andean Heartland, Sacred Valley, Ayahuasca Temple.";
+  }
+
+  if (isWachumaEvent(event)) {
+    return "Transformative Wachuma Journey in Peru's Andean Heartland, Sacred Valley, Ayahuasca Temple.";
+  }
+
+  if (isAyahuascaEvent(event)) {
+    return "Transformative Ayahuasca Journey in Peru's Andean Heartland, Sacred Valley, Ayahuasca Temple.";
+  }
+
+  return "Transformative Sacred Plant Medicine Journeys in Peru's Andean Heartland, Sacred Valley, Ayahuasca Temple.";
 }
 
 function getSocialTitle(event: EventPageData) {
@@ -120,15 +181,21 @@ function getSocialTitle(event: EventPageData) {
       .join(" • ");
   }
 
-  return [getCeremonyTitle(event), formatSingleDate(event.singleDate)]
+  return [getCeremonyTitle(event), formatSingleDate(getCeremonyDate(event))]
     .filter(Boolean)
     .join(" • ");
 }
 
-function getEventImageUrl(event: EventPageData) {
-  if (!event.cardImage) {
-    return `${SITE_URL}/images/no-event.png`;
+function getVisibleEventDate(event: EventPageData) {
+  if (event.eventType === "retreat") {
+    return formatRetreatDateRange(event.startDate, event.endDate);
   }
+
+  return formatSingleDate(getCeremonyDate(event));
+}
+
+function getEventImageUrl(event: EventPageData) {
+  if (!event.cardImage) return `${SITE_URL}/images/no-event.png`;
 
   return urlFor(event.cardImage).width(1200).height(630).fit("crop").url();
 }
@@ -161,12 +228,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  const title = getSocialTitle(event);
-  const description =
-    event.shortDescription ||
-    "A sacred plant medicine journey in Peru’s Sacred Valley.";
-  const imageUrl = getEventImageUrl(event);
-  const url = `${SITE_URL}/${event.slug || slug}`;
+  const eventWithSlug = {
+    ...event,
+    slug: event.slug || slug,
+  };
+
+  const title = getSocialTitle(eventWithSlug);
+  const description = getSocialDescription(eventWithSlug);
+  const imageUrl = getEventImageUrl(eventWithSlug);
+  const url = `${SITE_URL}/${eventWithSlug.slug}`;
 
   return {
     title,
@@ -213,12 +283,17 @@ export default async function DynamicPage({ params }: Props) {
 
   const event = await getEventBySlug(slug);
 
-  if (!event) {
-    notFound();
-  }
+  if (!event) notFound();
 
-  const title = getSocialTitle(event);
-  const imageUrl = getEventImageUrl(event);
+  const eventWithSlug = {
+    ...event,
+    slug: event.slug || slug,
+  };
+
+  const title = getSocialTitle(eventWithSlug);
+  const description = getSocialDescription(eventWithSlug);
+  const eventDate = getVisibleEventDate(eventWithSlug);
+  const imageUrl = getEventImageUrl(eventWithSlug);
 
   return (
     <main className="min-h-screen bg-[#F6F1E8] px-5 py-20 text-[#222222] md:px-8">
@@ -235,32 +310,30 @@ export default async function DynamicPage({ params }: Props) {
         </div>
 
         <div className="p-7 md:p-12">
-          {event.displaySubtitle ? (
+          {eventWithSlug.displaySubtitle ? (
             <p className="mb-4 text-[12px] uppercase tracking-[0.24em] text-[#2B4A40]/65">
-              {event.displaySubtitle}
+              {eventWithSlug.displaySubtitle}
             </p>
           ) : null}
 
           <h1 className="font-canela text-[44px] leading-[0.96] tracking-[-0.055em] text-[#111111] md:text-[72px]">
-            {event.displayTitle || event.title || title}
+            {eventWithSlug.displayTitle || eventWithSlug.title || title}
           </h1>
 
-          <p className="mt-5 text-[15px] uppercase tracking-[0.18em] text-[#8A5A44]">
-            {event.eventType === "retreat"
-              ? formatRetreatDateRange(event.startDate, event.endDate)
-              : formatSingleDate(event.singleDate)}
-          </p>
-
-          {event.shortDescription ? (
-            <p className="mt-7 max-w-[720px] text-[17px] leading-[1.8] text-[#222222]/72 md:text-[19px]">
-              {event.shortDescription}
+          {eventDate ? (
+            <p className="mt-5 text-[15px] uppercase tracking-[0.18em] text-[#8A5A44]">
+              {eventDate}
             </p>
           ) : null}
 
+          <p className="mt-7 max-w-[720px] text-[17px] leading-[1.8] text-[#222222]/72 md:text-[19px]">
+            {description}
+          </p>
+
           <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-            {event.reservationUrl ? (
+            {eventWithSlug.reservationUrl ? (
               <Link
-                href={event.reservationUrl}
+                href={eventWithSlug.reservationUrl}
                 className="inline-flex min-h-[54px] items-center justify-center rounded-full bg-[#2B4A40] px-8 text-[13px] font-medium uppercase tracking-[0.16em] text-white transition hover:bg-[#1F3A32]"
               >
                 Reserve Your Spot
