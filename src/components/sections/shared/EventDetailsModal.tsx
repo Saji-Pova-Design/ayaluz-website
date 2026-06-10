@@ -74,11 +74,158 @@ type Props = {
   event: EventDetailsEvent | null;
 };
 
+const SITE_URL = "https://www.ayaluz.org";
+
 const AYALUZ_LOCATION = {
   name: "AyaLuz Temple, Sacred Valley",
   googleMapsUrl:
     "https://www.google.com/maps?q=-13.4822877,-71.7929999",
 };
+
+const MONTHS: Record<string, number> = {
+  january: 0,
+  february: 1,
+  march: 2,
+  april: 3,
+  may: 4,
+  june: 5,
+  july: 6,
+  august: 7,
+  september: 8,
+  october: 9,
+  november: 10,
+  december: 11,
+};
+
+function getOrdinalSuffix(day: number) {
+  if (day >= 11 && day <= 13) return "th";
+  if (day % 10 === 1) return "st";
+  if (day % 10 === 2) return "nd";
+  if (day % 10 === 3) return "rd";
+
+  return "th";
+}
+
+function formatDateObject(date: Date) {
+  const month = date.toLocaleDateString("en-US", {
+    month: "long",
+  });
+
+  const day = date.getDate();
+
+  return `${month} ${day}${getOrdinalSuffix(day)}`;
+}
+
+function getCeremonyDateFromSlug(slug?: string) {
+  if (!slug) return "";
+
+  const normalizedSlug = slug.toLowerCase();
+
+  const spacedDateMatch = normalizedSlug.match(
+    /^ceremony-[a-z0-9-]+-(20\d{2})-(january|february|march|april|may|june|july|august|september|october|november|december)-(\d{1,2})$/,
+  );
+
+  const compactDateMatch = normalizedSlug.match(
+    /^ceremony-[a-z0-9-]+-(20\d{2})-(january|february|march|april|may|june|july|august|september|october|november|december)(\d{1,2})$/,
+  );
+
+  const match = spacedDateMatch || compactDateMatch;
+
+  if (!match) return "";
+
+  const [, year, monthName, dayRaw] = match;
+
+  const date = new Date(
+    Number(year),
+    MONTHS[monthName],
+    Number(dayRaw),
+    12,
+  );
+
+  return formatDateObject(date);
+}
+
+function getRetreatDateRangeFromSlug(slug?: string) {
+  if (!slug) return "";
+
+  const normalizedSlug = slug.toLowerCase();
+
+  const sameMonthMatch = normalizedSlug.match(
+    /^retreat-(20\d{2})-(january|february|march|april|may|june|july|august|september|october|november|december)-(\d{1,2})-(\d{1,2})$/,
+  );
+
+  const splitMonthMatch = normalizedSlug.match(
+    /^retreat-(20\d{2})-(january|february|march|april|may|june|july|august|september|october|november|december)-(\d{1,2})-(january|february|march|april|may|june|july|august|september|october|november|december)-(\d{1,2})$/,
+  );
+
+  const compactSplitMonthMatch = normalizedSlug.match(
+    /^retreat-(20\d{2})-(january|february|march|april|may|june|july|august|september|october|november|december)(\d{1,2})-(january|february|march|april|may|june|july|august|september|october|november|december)(\d{1,2})$/,
+  );
+
+  if (sameMonthMatch) {
+    const [, year, monthName, startDayRaw, endDayRaw] = sameMonthMatch;
+
+    const startDate = new Date(
+      Number(year),
+      MONTHS[monthName],
+      Number(startDayRaw),
+      12,
+    );
+
+    const endDate = new Date(
+      Number(year),
+      MONTHS[monthName],
+      Number(endDayRaw),
+      12,
+    );
+
+    return `${formatDateObject(startDate)} – ${formatDateObject(endDate)}`;
+  }
+
+  if (splitMonthMatch) {
+    const [, year, startMonthName, startDayRaw, endMonthName, endDayRaw] =
+      splitMonthMatch;
+
+    const startDate = new Date(
+      Number(year),
+      MONTHS[startMonthName],
+      Number(startDayRaw),
+      12,
+    );
+
+    const endDate = new Date(
+      Number(year),
+      MONTHS[endMonthName],
+      Number(endDayRaw),
+      12,
+    );
+
+    return `${formatDateObject(startDate)} – ${formatDateObject(endDate)}`;
+  }
+
+  if (compactSplitMonthMatch) {
+    const [, year, startMonthName, startDayRaw, endMonthName, endDayRaw] =
+      compactSplitMonthMatch;
+
+    const startDate = new Date(
+      Number(year),
+      MONTHS[startMonthName],
+      Number(startDayRaw),
+      12,
+    );
+
+    const endDate = new Date(
+      Number(year),
+      MONTHS[endMonthName],
+      Number(endDayRaw),
+      12,
+    );
+
+    return `${formatDateObject(startDate)} – ${formatDateObject(endDate)}`;
+  }
+
+  return "";
+}
 
 function getImageUrl(
   image?: SanityImage | null,
@@ -93,6 +240,66 @@ function getImageUrl(
   if (height) builder = builder.height(height);
 
   return builder.fit("crop").auto("format").url();
+}
+
+function getEventImageUrl(event: EventDetailsEvent) {
+  if (!event.cardImage) return "/images/no-event.png";
+
+  return urlFor(event.cardImage).width(1200).height(630).fit("crop").url();
+}
+
+function getEventSourceText(event: EventDetailsEvent) {
+  return `${event.displayTitle || ""} ${event.displaySubtitle || ""} ${
+    event.title || ""
+  }`.toLowerCase();
+}
+
+function isWachumaEvent(event: EventDetailsEvent) {
+  const source = getEventSourceText(event);
+
+  return source.includes("wachuma") || source.includes("san pedro");
+}
+
+function isAyahuascaEvent(event: EventDetailsEvent) {
+  return getEventSourceText(event).includes("ayahuasca");
+}
+
+function getCeremonyTitle(event: EventDetailsEvent) {
+  if (isWachumaEvent(event)) return "Wachuma Ceremony";
+
+  return "Ayahuasca Ceremony";
+}
+
+function getSocialDescription(event: EventDetailsEvent) {
+  if (event.eventType === "retreat") {
+    return "Transformative Sacred Plant Medicine Journeys in Peru's Andean Heartland, Sacred Valley, Ayahuasca Temple.";
+  }
+
+  if (isWachumaEvent(event)) {
+    return "Transformative Wachuma Journey in Peru's Andean Heartland, Sacred Valley, Ayahuasca Temple.";
+  }
+
+  if (isAyahuascaEvent(event)) {
+    return "Transformative Ayahuasca Journey in Peru's Andean Heartland, Sacred Valley, Ayahuasca Temple.";
+  }
+
+  return "Transformative Sacred Plant Medicine Journeys in Peru's Andean Heartland, Sacred Valley, Ayahuasca Temple.";
+}
+
+function getSocialTitle(event: EventDetailsEvent) {
+  if (event.eventType === "retreat") {
+    return [
+      event.displayTitle || event.title || "AyaLuz Retreat",
+      event.displaySubtitle,
+      getRetreatDateRangeFromSlug(event.slug),
+    ]
+      .filter(Boolean)
+      .join(" • ");
+  }
+
+  return [getCeremonyTitle(event), getCeremonyDateFromSlug(event.slug)]
+    .filter(Boolean)
+    .join(" • ");
 }
 
 function getTitle(event: EventDetailsEvent) {
@@ -125,26 +332,6 @@ function getCompactTimeRange(timeRange?: string | null) {
     .replace(/:00/g, "")
     .replace(/\s+/g, " ")
     .trim();
-}
-
-function getEventDateLabel(event: EventDetailsEvent) {
-  const rawDate =
-    event.eventType === "retreat"
-      ? event.startDate
-      : event.singleDate;
-
-  if (!rawDate) return "";
-
-  const date = new Date(rawDate);
-
-  if (Number.isNaN(date.getTime())) return "";
-
-  return date.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
 }
 
 function getCountdownTarget(event: EventDetailsEvent) {
@@ -262,6 +449,23 @@ function ShareArrowIcon() {
   );
 }
 
+function BackIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-5 w-5"
+      aria-hidden="true"
+    >
+      <path d="M15 18L9 12L15 6" />
+    </svg>
+  );
+}
+
 function CopyIcon() {
   return (
     <svg
@@ -281,17 +485,17 @@ function CopyIcon() {
 }
 
 function WhatsAppIcon() {
-  return (
-    <svg
-      viewBox="0 0 16 16"
-      fill="currentColor"
-      className="h-6 w-6"
-      aria-hidden="true"
-    >
-      <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93a7.898 7.898 0 0 0-2.327-5.607ZM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592Zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.589-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.65 0 .972.71 1.916.81 2.049.098.133 1.397 2.132 3.383 2.991.473.205.842.327 1.13.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232Z" />
-    </svg>
-  );
-}
+    return (
+      <svg
+        viewBox="0 0 16 16"
+        fill="currentColor"
+        className="h-6 w-6"
+        aria-hidden="true"
+      >
+        <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93a7.898 7.898 0 0 0-2.327-5.607ZM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592Zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.589-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.65 0 .972.71 1.916.81 2.049.098.133 1.397 2.132 3.383 2.991.473.205.842.327 1.13.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232Z" />
+      </svg>
+    );
+  }
 
 function InstagramIcon() {
   return (
@@ -331,58 +535,58 @@ function FacebookIcon() {
 
 function SectionDivider() {
   return (
-    <div className="my-4 md:my-8 h-px w-full bg-gradient-to-r from-transparent via-[#D7C7B3] to-transparent" />
+    <div className="my-4 h-px w-full bg-gradient-to-r from-transparent via-[#D7C7B3] to-transparent md:my-8" />
   );
 }
 
 function FeatureSection({
-    title,
-    items,
-  }: {
-    title: string;
-    items?: FeatureItem[];
-  }) {
-    if (!items || items.length === 0) {
-      return null;
-    }
-  
-    return (
-      <div className="mt-9">
-        <h3 className="mb-5 font-canela text-[2rem] leading-none tracking-[-0.04em] text-[#111111]">
-          {title}
-        </h3>
-  
-        <div className="grid gap-4 md:grid-cols-2">
-          {items.map((item, index) => {
-            const iconUrl = getImageUrl(item.icon, 80, 80);
-  
-            return (
-              <div
-                key={`${item.text || "feature"}-${index}`}
-                className="flex items-start gap-4 rounded-[24px] border border-[#E4D7C7] bg-[#FFFAF1] p-5"
-              >
-                {iconUrl && (
-                  <div className="relative h-11 w-11 shrink-0 overflow-hidden">
-                    <Image
-                      src={iconUrl}
-                      alt=""
-                      fill
-                      unoptimized
-                      className="object-contain"
-                    />
-                  </div>
-                )}
-  
-                <p className="text-[0.98rem] leading-[1.75] text-[#1C1C1C]">
-                  {item.text}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
+  title,
+  items,
+}: {
+  title: string;
+  items?: FeatureItem[];
+}) {
+  if (!items || items.length === 0) {
+    return null;
   }
+
+  return (
+    <div className="mt-9">
+      <h3 className="mb-5 font-canela text-[2rem] leading-none tracking-[-0.04em] text-[#111111]">
+        {title}
+      </h3>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        {items.map((item, index) => {
+          const iconUrl = getImageUrl(item.icon, 80, 80);
+
+          return (
+            <div
+              key={`${item.text || "feature"}-${index}`}
+              className="flex items-start gap-4 rounded-[24px] border border-[#E4D7C7] bg-[#FFFAF1] p-5"
+            >
+              {iconUrl && (
+                <div className="relative h-11 w-11 shrink-0 overflow-hidden">
+                  <Image
+                    src={iconUrl}
+                    alt=""
+                    fill
+                    unoptimized
+                    className="object-contain"
+                  />
+                </div>
+              )}
+
+              <p className="text-[0.98rem] leading-[1.75] text-[#1C1C1C]">
+                {item.text}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 function ShareView({
   event,
@@ -395,7 +599,7 @@ function ShareView({
   event: EventDetailsEvent;
   title: string;
   description: string;
-  imageUrl: string | null;
+  imageUrl: string;
   onBack: () => void;
   onClose: () => void;
 }) {
@@ -409,9 +613,6 @@ function ShareView({
       : "";
 
   const encodedUrl = encodeURIComponent(shareUrl);
-  const encodedText = "";
-
-  const eventDate = getEventDateLabel(event);
 
   async function handleCopyLink() {
     if (!shareUrl) return;
@@ -426,60 +627,52 @@ function ShareView({
   }
 
   return (
-    <div className="relative px-6 pb-10 pt-7 md:px-12 md:pb-16 md:pt-10">
-      <button
-        type="button"
-        onClick={onBack}
-        className="absolute left-6 top-7 hidden h-10 w-10 items-center justify-center rounded-full border border-[#2B4A40]/10 bg-[#F6F1E8] text-[#111111] md:flex"
-        aria-label="Back to event details"
-      >
-        ←
-      </button>
+    <div className="relative px-6 pb-[calc(2.5rem+env(safe-area-inset-bottom))] pt-7 md:px-12 md:pb-16 md:pt-10">
+      <div className="relative flex h-12 items-center justify-center">
+        <button
+          type="button"
+          onClick={onBack}
+          className="absolute left-0 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-[#2B4A40]/10 bg-[#F6F1E8] text-[#111111]"
+          aria-label="Back to event details"
+        >
+          <BackIcon />
+        </button>
 
-      <button
-        type="button"
-        onClick={onClose}
-        className="absolute right-6 top-7 flex h-10 w-10 items-center justify-center rounded-full text-2xl leading-none text-[#111111] md:right-12 md:top-10"
-        aria-label="Close share view"
-      >
-        ×
-      </button>
+        <h2 className="text-center text-xl font-semibold tracking-[-0.03em] text-[#111111] md:text-2xl">
+          Share this event
+        </h2>
 
-      <h2 className="text-center text-xl font-semibold tracking-[-0.03em] text-[#111111] md:text-2xl">
-        Share this event
-      </h2>
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-0 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full text-3xl leading-none text-[#111111]"
+          aria-label="Close share view"
+        >
+          ×
+        </button>
+      </div>
 
       <div className="mx-auto mt-10 grid max-w-[980px] gap-8 md:mt-16 md:grid-cols-[1fr_1fr] md:items-start md:gap-14">
         <div className="overflow-hidden rounded-[24px] bg-[#FFFAF1] shadow-[0_28px_70px_-52px_rgba(20,25,22,0.55)]">
-          {imageUrl && (
-            <div className="relative h-[190px] w-full overflow-hidden bg-[#EFE7D8] md:h-[245px]">
-              <Image
-                src={imageUrl}
-                alt={title}
-                fill
-                unoptimized
-                sizes="(max-width: 768px) 100vw, 520px"
-                className="object-cover"
-              />
-            </div>
-          )}
+          <div className="relative aspect-[1200/630] w-full overflow-hidden bg-[#EFE7D8]">
+            <Image
+              src={imageUrl}
+              alt={title}
+              fill
+              unoptimized
+              sizes="(max-width: 768px) 100vw, 520px"
+              className="object-cover"
+            />
+          </div>
 
           <div className="p-5 md:p-6">
             <h3 className="text-xl font-semibold leading-[1.15] tracking-[-0.04em] text-[#111111] md:text-2xl">
-              {title} • AyaLuz
+              {title}
             </h3>
 
-            {eventDate && (
-              <p className="mt-4 text-base font-medium leading-[1.35] text-[#111111] md:text-lg">
-                {eventDate}
-              </p>
-            )}
-
-            {description && (
-              <p className="mt-1 text-base leading-[1.35] text-[#111111] md:text-lg">
-                {description}
-              </p>
-            )}
+            <p className="mt-4 text-base leading-[1.45] text-[#111111] md:text-lg">
+              {description}
+            </p>
 
             <p className="mt-5 text-base leading-none text-[#111111]/45 md:text-lg">
               ayaluz.org
@@ -488,11 +681,11 @@ function ShareView({
         </div>
 
         <div className="relative">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-2 gap-4">
             <button
               type="button"
               onClick={handleCopyLink}
-              className="inline-flex h-16 items-center justify-start gap-4 rounded-[14px] border border-[#E4D7C7] bg-[#F4EFE7] px-5 text-left text-lg font-medium text-[#111111] transition-all duration-300 hover:border-[#215848]/30 hover:bg-[#FFFAF1]"
+              className="inline-flex h-16 items-center justify-center gap-3 rounded-[14px] border border-[#E4D7C7] bg-[#F4EFE7] px-4 text-center text-base font-medium text-[#111111] transition-all duration-300 hover:border-[#215848]/30 hover:bg-[#FFFAF1] md:justify-start md:px-5 md:text-lg"
             >
               <CopyIcon />
               Copy link
@@ -502,7 +695,7 @@ function ShareView({
               href={`https://wa.me/?text=${encodedUrl}`}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex h-16 items-center justify-start gap-4 rounded-[14px] border border-[#E4D7C7] bg-[#F4EFE7] px-5 text-left text-lg font-medium text-[#111111] transition-all duration-300 hover:border-[#215848]/30 hover:bg-[#FFFAF1]"
+              className="inline-flex h-16 items-center justify-center gap-3 rounded-[14px] border border-[#E4D7C7] bg-[#F4EFE7] px-4 text-center text-base font-medium text-[#111111] transition-all duration-300 hover:border-[#215848]/30 hover:bg-[#FFFAF1] md:justify-start md:px-5 md:text-lg"
             >
               <span className="text-[#27B43E]">
                 <WhatsAppIcon />
@@ -514,7 +707,7 @@ function ShareView({
               href="https://www.instagram.com/"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex h-16 items-center justify-start gap-4 rounded-[14px] border border-[#E4D7C7] bg-[#F4EFE7] px-5 text-left text-lg font-medium text-[#111111] transition-all duration-300 hover:border-[#215848]/30 hover:bg-[#FFFAF1]"
+              className="inline-flex h-16 items-center justify-center gap-3 rounded-[14px] border border-[#E4D7C7] bg-[#F4EFE7] px-4 text-center text-base font-medium text-[#111111] transition-all duration-300 hover:border-[#215848]/30 hover:bg-[#FFFAF1] md:justify-start md:px-5 md:text-lg"
             >
               <InstagramIcon />
               Instagram
@@ -524,7 +717,7 @@ function ShareView({
               href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex h-16 items-center justify-start gap-4 rounded-[14px] border border-[#E4D7C7] bg-[#F4EFE7] px-5 text-left text-lg font-medium text-[#111111] transition-all duration-300 hover:border-[#215848]/30 hover:bg-[#FFFAF1]"
+              className="inline-flex h-16 items-center justify-center gap-3 rounded-[14px] border border-[#E4D7C7] bg-[#F4EFE7] px-4 text-center text-base font-medium text-[#111111] transition-all duration-300 hover:border-[#215848]/30 hover:bg-[#FFFAF1] md:justify-start md:px-5 md:text-lg"
             >
               <FacebookIcon />
               FaceBook
@@ -533,13 +726,14 @@ function ShareView({
 
           <div
             className={`
-              mt-5 rounded-[18px] border border-[#D7C7B3] bg-[#FFFAF1] px-5 py-4 text-sm leading-[1.65] text-[#215848]
-              shadow-[0_18px_60px_-34px_rgba(20,25,22,0.35)]
+              fixed left-1/2 top-1/2 z-50 w-[min(84vw,420px)] -translate-x-1/2 rounded-[22px]
+              border border-[#D7C7B3] bg-[#FFFAF1] px-6 py-5 text-center text-sm leading-[1.65]
+              text-[#215848] shadow-[0_24px_80px_-35px_rgba(20,25,22,0.55)]
               transition-all duration-500 ease-out
               ${
                 copied
-                  ? "translate-y-0 opacity-100"
-                  : "pointer-events-none translate-y-3 opacity-0"
+                  ? "-translate-y-1/2 scale-100 opacity-100"
+                  : "pointer-events-none -translate-y-[42%] scale-95 opacity-0"
               }
             `}
           >
@@ -567,6 +761,9 @@ export default function EventDetailsModal({
   useEffect(() => {
     if (!open) return;
 
+    const previousOverflow = document.body.style.overflow;
+    const previousTouchAction = document.body.style.touchAction;
+
     const handleEscape = (keyboardEvent: KeyboardEvent) => {
       if (keyboardEvent.key === "Escape") {
         onClose();
@@ -574,10 +771,12 @@ export default function EventDetailsModal({
     };
 
     document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
     window.addEventListener("keydown", handleEscape);
 
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow;
+      document.body.style.touchAction = previousTouchAction;
       window.removeEventListener("keydown", handleEscape);
     };
   }, [open, onClose]);
@@ -594,20 +793,19 @@ export default function EventDetailsModal({
     const title = getTitle(event);
     const image = getHeroImage(event);
 
+    const eventWithSiteSlug = {
+      ...event,
+      slug: event.slug,
+    };
+
     return {
       title,
       subtitle: getSubtitle(event),
       image,
       compactTimeRange: getCompactTimeRange(event.timeRange),
-      shareTitle: event.shareTitle || title,
-      shareDescription:
-        event.shareDescription ||
-        event.shortDescription ||
-        event.description ||
-        "",
-      shareImage:
-        getImageUrl(event.sharePreviewImage, 1200, 800) ||
-        image,
+      shareTitle: getSocialTitle(eventWithSiteSlug),
+      shareDescription: getSocialDescription(eventWithSiteSlug),
+      shareImage: getEventImageUrl(eventWithSiteSlug),
     };
   }, [event]);
 
@@ -619,25 +817,25 @@ export default function EventDetailsModal({
 
   return (
     <div
-      className="fixed inset-0 z-[999] flex items-end justify-center bg-black/45 backdrop-blur-[4px] md:items-center md:px-6"
+      className="fixed inset-0 z-[999] flex h-[100dvh] items-end justify-center overflow-hidden bg-black/45 backdrop-blur-[4px] md:items-center md:px-6"
       onClick={onClose}
     >
       <div
         onClick={(clickEvent) => clickEvent.stopPropagation()}
-        className="relative max-h-[94vh] w-full overflow-hidden rounded-t-[34px] bg-[#F4EFE7] md:max-w-[1220px] md:rounded-[36px]"
+        className="relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-[34px] bg-[#F4EFE7] shadow-[0_-24px_80px_-40px_rgba(0,0,0,0.65)] md:max-h-[94vh] md:max-w-[1220px] md:rounded-[36px]"
       >
         {!shareView && (
           <button
             type="button"
             onClick={onClose}
-            className="absolute right-5 top-5 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[#F4EFE7] text-[1.8rem] text-[#111111] md:h-14 md:w-14 md:text-[2rem]"
+            className="absolute right-5 top-5 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[#F4EFE7] text-[1.8rem] text-[#111111] shadow-[0_10px_35px_-24px_rgba(0,0,0,0.6)] md:h-14 md:w-14 md:text-[2rem]"
             aria-label="Close event details"
           >
             ×
           </button>
         )}
 
-        <div className="max-h-[94vh] overflow-y-auto">
+        <div className="max-h-[92dvh] overflow-y-auto overscroll-contain bg-[#F4EFE7] pb-[env(safe-area-inset-bottom)] md:max-h-[94vh]">
           {shareView ? (
             <ShareView
               event={event}
@@ -670,7 +868,7 @@ export default function EventDetailsModal({
                 </div>
               )}
 
-              <div className="px-6 pb-10 pt-7 md:px-12 md:pb-12 md:pt-10">
+              <div className="px-6 pb-[calc(2.5rem+env(safe-area-inset-bottom))] pt-7 md:px-12 md:pb-12 md:pt-10">
                 <div className="flex flex-col gap-7 md:flex-row md:items-start md:justify-between">
                   <div className="min-w-0 flex-1">
                     <h2 className="font-canela text-3xl font-medium leading-[0.9] tracking-[-0.06em] text-[#111111] md:text-6xl">
@@ -724,13 +922,11 @@ export default function EventDetailsModal({
                   </div>
                 </div>
 
-                <div className="mt-3 md:mt-7 flex flex-col gap-6 md:gap-3 md:flex-row md:items-stretch">
+                <div className="mt-3 flex flex-col gap-6 md:mt-7 md:flex-row md:items-stretch md:gap-3">
                   <div className="flex flex-col gap-3 md:contents">
                     {event.useCardDateBadgeInDetail !== false && (
                       <div className="shrink-0">
-                        
-                          <EventDateBadge event={event} />
-                    
+                        <EventDateBadge event={event} />
                       </div>
                     )}
 
@@ -766,7 +962,7 @@ export default function EventDetailsModal({
 
                   {event.showAnnouncementInDetail !== false &&
                     event.announcementNote && (
-                      <div className="flex min-h-full flex-1 items-center rounded-[16px] border border-[#E6C89E] bg-[#F7F0E6] px-6 py-3 md-py-5 md:ml-2">
+                      <div className="flex min-h-full flex-1 items-center rounded-[16px] border border-[#E6C89E] bg-[#F7F0E6] px-6 py-3 md:ml-2 md:py-5">
                         <p className="text-[1rem] leading-[1.55] text-[#8D643D]">
                           {event.announcementNote}
                         </p>

@@ -9,9 +9,7 @@ import { urlFor } from "@/sanity/lib/image";
 import { getEventBySlug, getPage } from "@/sanity/lib/getPage";
 
 type Props = {
-  params: Promise<{
-    slug: string;
-  }>;
+  params: Promise<{ slug: string }>;
 };
 
 type SanityImage = {
@@ -28,8 +26,6 @@ type EventPageData = {
   displaySubtitle?: string;
   slug?: string;
   eventType?: "single-day" | "retreat";
-  shortDescription?: string;
-  singleDate?: string;
   startDate?: string;
   endDate?: string;
   reservationUrl?: string;
@@ -38,100 +34,149 @@ type EventPageData = {
 
 const SITE_URL = "https://www.ayaluz.org";
 
+const MONTHS: Record<string, number> = {
+  january: 0,
+  february: 1,
+  march: 2,
+  april: 3,
+  may: 4,
+  june: 5,
+  july: 6,
+  august: 7,
+  september: 8,
+  october: 9,
+  november: 10,
+  december: 11,
+};
+
 function getOrdinalSuffix(day: number) {
   if (day >= 11 && day <= 13) return "th";
-
-  const lastDigit = day % 10;
-
-  if (lastDigit === 1) return "st";
-  if (lastDigit === 2) return "nd";
-  if (lastDigit === 3) return "rd";
+  if (day % 10 === 1) return "st";
+  if (day % 10 === 2) return "nd";
+  if (day % 10 === 3) return "rd";
 
   return "th";
 }
 
-function parseSafeDate(date?: string) {
-  if (!date) return null;
-
-  const parsedDate = new Date(`${date}T12:00:00`);
-
-  if (Number.isNaN(parsedDate.getTime())) return null;
-
-  return parsedDate;
-}
-
-function getDateFromSlug(slug?: string) {
-  if (!slug) return "";
-
-  const match = slug
-    .toLowerCase()
-    .match(/(20\d{2})-(january|february|march|april|may|june|july|august|september|october|november|december)-(\d{1,2})/);
-
-  if (!match) return "";
-
-  const [, year, monthName, day] = match;
-
-  const monthMap: Record<string, string> = {
-    january: "01",
-    february: "02",
-    march: "03",
-    april: "04",
-    may: "05",
-    june: "06",
-    july: "07",
-    august: "08",
-    september: "09",
-    october: "10",
-    november: "11",
-    december: "12",
-  };
-
-  return `${year}-${monthMap[monthName]}-${day.padStart(2, "0")}`;
-}
-
-function formatSingleDate(date?: string) {
-  const parsedDate = parseSafeDate(date);
-
-  if (!parsedDate) return "";
-
-  const month = parsedDate.toLocaleDateString("en-US", {
+function formatDateObject(date: Date) {
+  const month = date.toLocaleDateString("en-US", {
     month: "long",
   });
 
-  const day = parsedDate.getDate();
+  const day = date.getDate();
 
   return `${month} ${day}${getOrdinalSuffix(day)}`;
 }
 
-function formatRetreatDateRange(startDate?: string, endDate?: string) {
-  const start = parseSafeDate(startDate);
-  const end = parseSafeDate(endDate);
+function getCeremonyDateFromSlug(slug?: string) {
+  if (!slug) return "";
 
-  if (!start && !end) return "";
-  if (start && !end) return formatSingleDate(startDate);
-  if (!start && end) return formatSingleDate(endDate);
-  if (!start || !end) return "";
+  const normalizedSlug = slug.toLowerCase();
 
-  const startMonth = start.toLocaleDateString("en-US", {
-    month: "long",
-  });
+  const spacedDateMatch = normalizedSlug.match(
+    /^ceremony-[a-z0-9-]+-(20\d{2})-(january|february|march|april|may|june|july|august|september|october|november|december)-(\d{1,2})$/,
+  );
 
-  const endMonth = end.toLocaleDateString("en-US", {
-    month: "long",
-  });
+  const compactDateMatch = normalizedSlug.match(
+    /^ceremony-[a-z0-9-]+-(20\d{2})-(january|february|march|april|may|june|july|august|september|october|november|december)(\d{1,2})$/,
+  );
 
-  const startDay = start.getDate();
-  const endDay = end.getDate();
+  const match = spacedDateMatch || compactDateMatch;
 
-  if (startMonth === endMonth) {
-    return `${startMonth} ${startDay}${getOrdinalSuffix(startDay)} – ${endDay}${getOrdinalSuffix(endDay)}`;
-  }
+  if (!match) return "";
 
-  return `${startMonth} ${startDay}${getOrdinalSuffix(startDay)} – ${endMonth} ${endDay}${getOrdinalSuffix(endDay)}`;
+  const [, year, monthName, dayRaw] = match;
+
+  const date = new Date(
+    Number(year),
+    MONTHS[monthName],
+    Number(dayRaw),
+    12,
+  );
+
+  return formatDateObject(date);
 }
 
-function getCeremonyDate(event: EventPageData) {
-  return getDateFromSlug(event.slug);
+function getRetreatDateRangeFromSlug(slug?: string) {
+  if (!slug) return "";
+
+  const normalizedSlug = slug.toLowerCase();
+
+  const sameMonthMatch = normalizedSlug.match(
+    /^retreat-(20\d{2})-(january|february|march|april|may|june|july|august|september|october|november|december)-(\d{1,2})-(\d{1,2})$/,
+  );
+
+  const splitMonthMatch = normalizedSlug.match(
+    /^retreat-(20\d{2})-(january|february|march|april|may|june|july|august|september|october|november|december)-(\d{1,2})-(january|february|march|april|may|june|july|august|september|october|november|december)-(\d{1,2})$/,
+  );
+
+  const compactSplitMonthMatch = normalizedSlug.match(
+    /^retreat-(20\d{2})-(january|february|march|april|may|june|july|august|september|october|november|december)(\d{1,2})-(january|february|march|april|may|june|july|august|september|october|november|december)(\d{1,2})$/,
+  );
+
+  if (sameMonthMatch) {
+    const [, year, monthName, startDayRaw, endDayRaw] = sameMonthMatch;
+
+    const startDate = new Date(
+      Number(year),
+      MONTHS[monthName],
+      Number(startDayRaw),
+      12,
+    );
+
+    const endDate = new Date(
+      Number(year),
+      MONTHS[monthName],
+      Number(endDayRaw),
+      12,
+    );
+
+    return `${formatDateObject(startDate)} – ${formatDateObject(endDate)}`;
+  }
+
+  if (splitMonthMatch) {
+    const [, year, startMonthName, startDayRaw, endMonthName, endDayRaw] =
+      splitMonthMatch;
+
+    const startDate = new Date(
+      Number(year),
+      MONTHS[startMonthName],
+      Number(startDayRaw),
+      12,
+    );
+
+    const endDate = new Date(
+      Number(year),
+      MONTHS[endMonthName],
+      Number(endDayRaw),
+      12,
+    );
+
+    return `${formatDateObject(startDate)} – ${formatDateObject(endDate)}`;
+  }
+
+  if (compactSplitMonthMatch) {
+    const [, year, startMonthName, startDayRaw, endMonthName, endDayRaw] =
+      compactSplitMonthMatch;
+
+    const startDate = new Date(
+      Number(year),
+      MONTHS[startMonthName],
+      Number(startDayRaw),
+      12,
+    );
+
+    const endDate = new Date(
+      Number(year),
+      MONTHS[endMonthName],
+      Number(endDayRaw),
+      12,
+    );
+
+    return `${formatDateObject(startDate)} – ${formatDateObject(endDate)}`;
+  }
+
+  return "";
 }
 
 function getEventSourceText(event: EventPageData) {
@@ -175,23 +220,23 @@ function getSocialTitle(event: EventPageData) {
     return [
       event.displayTitle || event.title || "AyaLuz Retreat",
       event.displaySubtitle,
-      formatRetreatDateRange(event.startDate, event.endDate),
+      getRetreatDateRangeFromSlug(event.slug),
     ]
       .filter(Boolean)
       .join(" • ");
   }
 
-  return [getCeremonyTitle(event), formatSingleDate(getCeremonyDate(event))]
+  return [getCeremonyTitle(event), getCeremonyDateFromSlug(event.slug)]
     .filter(Boolean)
     .join(" • ");
 }
 
 function getVisibleEventDate(event: EventPageData) {
   if (event.eventType === "retreat") {
-    return formatRetreatDateRange(event.startDate, event.endDate);
+    return getRetreatDateRangeFromSlug(event.slug);
   }
 
-  return formatSingleDate(getCeremonyDate(event));
+  return getCeremonyDateFromSlug(event.slug);
 }
 
 function getEventImageUrl(event: EventPageData) {
@@ -230,13 +275,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const eventWithSlug = {
     ...event,
-    slug: event.slug || slug,
+    slug,
   };
 
   const title = getSocialTitle(eventWithSlug);
   const description = getSocialDescription(eventWithSlug);
   const imageUrl = getEventImageUrl(eventWithSlug);
-  const url = `${SITE_URL}/${eventWithSlug.slug}`;
+  const url = `${SITE_URL}/${slug}`;
 
   return {
     title,
@@ -287,7 +332,7 @@ export default async function DynamicPage({ params }: Props) {
 
   const eventWithSlug = {
     ...event,
-    slug: event.slug || slug,
+    slug,
   };
 
   const title = getSocialTitle(eventWithSlug);
