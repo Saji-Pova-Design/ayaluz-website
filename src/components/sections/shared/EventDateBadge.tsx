@@ -12,6 +12,24 @@ type DateParts = {
   year: string;
 };
 
+const LONG_MONTHS = [
+  "January",
+  "February",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+function formatMonthName(month: string) {
+  if (LONG_MONTHS.includes(month)) {
+    return month.slice(0, 3);
+  }
+
+  return month;
+}
+
 function getDateParts(date?: string | null): DateParts | null {
   if (!date) return null;
 
@@ -19,11 +37,13 @@ function getDateParts(date?: string | null): DateParts | null {
 
   if (Number.isNaN(parsedDate.getTime())) return null;
 
+  const month = parsedDate.toLocaleDateString("en-US", {
+    month: "long",
+  });
+
   return {
     day: String(parsedDate.getDate()),
-    month: parsedDate.toLocaleDateString("en-US", {
-      month: "long",
-    }),
+    month: formatMonthName(month),
     weekday: parsedDate.toLocaleDateString("en-US", {
       weekday: "long",
     }),
