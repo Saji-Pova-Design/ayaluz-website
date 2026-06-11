@@ -174,10 +174,15 @@ export default function EventPageShareButton({
     description ||
     "Transformative Sacred Plant Medicine Journeys in Peru's Andean Heartland, Sacred Valley, Ayahuasca Temple.";
 
-  const encodedUrl = encodeURIComponent(url);
+    const shareUrl =
+    mounted && typeof window !== "undefined"
+      ? `${window.location.origin}${window.location.pathname}`
+      : url;
+  
+  const encodedUrl = encodeURIComponent(shareUrl);
 
   async function handleCopyLink() {
-    await navigator.clipboard.writeText(url);
+    await navigator.clipboard.writeText(shareUrl);
     setCopied(true);
 
     window.setTimeout(() => {
