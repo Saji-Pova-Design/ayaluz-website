@@ -608,7 +608,7 @@ function ShareView({
   const shareUrl =
     typeof window !== "undefined"
       ? event.slug
-        ? `${window.location.origin}/${event.slug}`
+        ? `${window.location.origin}/events/${event.slug}`
         : window.location.href
       : "";
 
