@@ -388,7 +388,7 @@ export default function CalendarSection({
 
   return (
     <>
-      <section className="bg-[#F5EFE4] px-6 py-6 text-[#1F1A14] md:px-30 md:py-8 lg:px-30">
+      <section className="bg-[#F5EFE4] px-6 py-6 text-[#1F1A14] md:px-10 md:py-8 lg:px-16">
         <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-end lg:gap-5">
             <div className="max-w-3xl">

@@ -141,6 +141,50 @@ function findHomepageSection(
 ) {
   return sections.find((section) => section._type === type);
 }
+function getOrdinalSuffix(day: number) {
+  if (day >= 11 && day <= 13) return "th";
+  if (day % 10 === 1) return "st";
+  if (day % 10 === 2) return "nd";
+  if (day % 10 === 3) return "rd";
+
+  return "th";
+}
+
+function formatShareDate(date?: string | null) {
+  if (!date) return "";
+
+  const parsedDate = new Date(date);
+
+  if (Number.isNaN(parsedDate.getTime())) return "";
+
+  const month = parsedDate.toLocaleDateString("en-US", {
+    month: "long",
+  });
+
+  const day = parsedDate.getDate();
+
+  return `${month} ${day}${getOrdinalSuffix(day)}`;
+}
+
+function getShareDateText(event: EventPageData) {
+  if (event.eventType === "retreat") {
+    return [formatShareDate(event.startDate), formatShareDate(event.endDate)]
+      .filter(Boolean)
+      .join(" – ");
+  }
+
+  return formatShareDate(event.singleDate);
+}
+
+function getShareTitle(event: EventPageData) {
+  return [
+    event.displayTitle || event.title || "AyaLuz Event",
+    event.displaySubtitle,
+    getShareDateText(event),
+  ]
+    .filter(Boolean)
+    .join(" • ");
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -152,8 +196,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  const title = event.seoTitle || getTitle(event);
-  const description = event.seoDescription || getDescription(event);
+  const title = getShareTitle(event);
+  const description =
+    event.eventType === "retreat"
+      ? "Transformative Sacred Plant Medicine Journeys in Peru's Andean Heartland, Sacred Valley, AyaLuz Temple."
+      : "Transformative Sacred Plant Medicine Journey in Peru's Andean Heartland, Sacred Valley, AyaLuz Temple.";
   const url = `${SITE_URL}/events/${slug}`;
   const imageUrl = getSeoImage(event);
 
@@ -374,7 +421,11 @@ export default async function EventPage({ params }: Props) {
 <EventPageShareButton
   title={title}
   subtitle={eventWithSlug.displaySubtitle}
-  description={description}
+  description={
+    eventWithSlug.eventType === "retreat"
+      ? "Transformative Sacred Plant Medicine Journeys in Peru's Andean Heartland, Sacred Valley, AyaLuz Temple."
+    : "Transformative Sacred Plant Medicine Journey in Peru's Andean Heartland, Sacred Valley, AyaLuz Temple."
+  }
   imageUrl={getSeoImage(eventWithSlug)}
   url={eventUrl}
   eventType={eventWithSlug.eventType}

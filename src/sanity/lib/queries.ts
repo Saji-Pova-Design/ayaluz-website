@@ -194,10 +194,23 @@ export const pageBySlugQuery = groq`
         "manualEvents": *[
           _type == "event" &&
           coalesce(status, "published") == "published" &&
-          defined(coalesce(singleDate, startDate)) &&
-          coalesce(singleDate, startDate) >= now()
+          defined(
+              select(
+                eventType == "retreat" => startDate,
+                singleDate
+              )
+            ) &&
+          select(
+              eventType == "retreat" => startDate,
+              singleDate
+            ) >= now()
         ]
-        | order(coalesce(singleDate, startDate) asc) {
+        | order(
+              select(
+                eventType == "retreat" => startDate,
+                singleDate
+              ) asc
+            ) {
           ${eventFields}
         }
       },
@@ -216,10 +229,23 @@ export const pageBySlugQuery = groq`
         "automaticEvents": *[
           _type == "event" &&
           coalesce(status, "published") == "published" &&
-          defined(coalesce(singleDate, startDate)) &&
-          coalesce(singleDate, startDate) >= now()
+          defined(
+              select(
+                eventType == "retreat" => startDate,
+                singleDate
+              )
+            ) &&
+          select(
+              eventType == "retreat" => startDate,
+              singleDate
+            ) >= now()
         ]
-        | order(coalesce(singleDate, startDate) asc)[0...12] {
+        | order(
+              select(
+                eventType == "retreat" => startDate,
+                singleDate
+              ) asc
+            )[0...12] {
           ${eventFields}
         }
       },
